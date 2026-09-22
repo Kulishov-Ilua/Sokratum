@@ -12,7 +12,7 @@ interface MessageDao {
     suspend fun getChatMessages(chatId: Long): List<MessageEntity>
 
     @Query("select * from messages where id = :id")
-    suspend fun getChat(id: Long): MessageEntity?
+    suspend fun getMessage(id: Long): MessageEntity?
 
     @Query("SELECT * FROM messages WHERE idChat = :chatId AND sendTime > :updateTime ORDER BY sendTime")
     fun updateMessages(chatId: Long, updateTime: Long): Flow<List<MessageEntity>>
