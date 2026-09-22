@@ -89,14 +89,10 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-        iosMain.dependencies {
+        nativeMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
         }
-        jsMain.dependencies {
-            implementation(libs.wrappers.browser)
-            implementation(libs.androidx.sqlite.bundled.web)
-        }
-        wasmJsMain.dependencies {
+        webMain.dependencies {
             implementation(libs.androidx.sqlite.bundled.web)
         }
     }
