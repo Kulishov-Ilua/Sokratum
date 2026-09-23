@@ -24,6 +24,9 @@ room3 = "3.1.0-alpha01"
 sqlite = "2.7.1"
 ksp = "2.3.12"
 
+koogAgents = "1.2.0"
+koogAgentsBeta = "1.2.0-beta"
+
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
@@ -57,6 +60,12 @@ androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.r
 androidx-sqlite-bundled-web = { module = "androidx.sqlite:sqlite-web", version.ref = "sqlite" }
 androidx-room3-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room3" }
 androidx-room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room3" }
+
+koog-agents = { module = "ai.koog:koog-agents", version.ref = "koogAgents" }
+koog-embeddings = { module = "ai.koog:embeddings-base", version.ref = "koogAgents" }
+koog-rag-base = { module = "ai.koog:rag-base", version.ref = "koogAgents" }
+koog-rag-vector = { module = "ai.koog:rag-vector", version.ref = "koogAgentsBeta" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

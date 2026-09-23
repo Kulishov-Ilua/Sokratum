@@ -10,6 +10,7 @@ import ru.kulishov.sokratum.domain.model.Chat
 import ru.kulishov.sokratum.domain.model.ChatAndMessages
 import ru.kulishov.sokratum.domain.model.Message
 import ru.kulishov.sokratum.domain.repository.ChatRepository
+import kotlin.time.Clock
 
 class ChatRepositoryImpl(
     private val chatDao: ChatDao,
@@ -47,10 +48,10 @@ class ChatRepositoryImpl(
     }
 
     override suspend fun addMessage(
-        chatId: Long,
-        text: String
+        message: Message
     ): Message? {
-        val id = messageDao.addMessage(chatId, text)
+        val newMessage = message.copy(sendTime = Clock.System.now().epochSeconds)
+        val id = messageDao.addMessage(message)
         val findMessage = messageDao.getMessage(id)
         if (findMessage == null) return null
         else return MessageMapper.toDomain(findMessage)
