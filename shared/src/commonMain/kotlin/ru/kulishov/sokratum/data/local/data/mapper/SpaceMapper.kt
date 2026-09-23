@@ -21,11 +21,11 @@ object SpaceMapper {
         lastOpen = domain.lastOpen
     )
 
-    fun toDomainWithoutStorage(entity: SpaceWithoutStorage): Space = Space(
+    fun toDomainWithoutStorage(entity: SpaceWithoutStorage): SpaceWithoutStorage =
+        SpaceWithoutStorage(
         id = entity.id,
         name = entity.name,
         path = entity.path,
-        storage = FloatArray(0),
         lastOpen = entity.lastOpen
     )
 }

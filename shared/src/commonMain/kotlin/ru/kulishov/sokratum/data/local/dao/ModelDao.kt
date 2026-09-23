@@ -19,5 +19,5 @@ interface ModelDao {
     suspend fun addModel(model: ModelEntity): Long
 
     @Delete
-    suspend fun deleteModel(model: ModelEntity): Long
+    suspend fun deleteModel(model: ModelEntity)
 }

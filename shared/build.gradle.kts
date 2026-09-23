@@ -1,4 +1,3 @@
-import org.jetbrains.compose.reload.core.withClosure
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -83,20 +82,20 @@ kotlin {
             implementation(libs.navigation.compose)
 
             implementation(libs.androidx.room3.runtime)
+            implementation(libs.koog.agents)
+            implementation(libs.koog.embeddings)
+            implementation(libs.koog.rag.base)
+            implementation(libs.koog.rag.vector)
 
         }
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-        iosMain.dependencies {
+        nativeMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
         }
-        jsMain.dependencies {
-            implementation(libs.wrappers.browser)
-            implementation(libs.androidx.sqlite.bundled.web)
-        }
-        wasmJsMain.dependencies {
+        webMain.dependencies {
             implementation(libs.androidx.sqlite.bundled.web)
         }
     }
