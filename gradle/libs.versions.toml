@@ -14,6 +14,7 @@ junit = "4.13.2"
 kotlin = "2.4.20"
 kotlin-wrappers = "2026.9.1"
 kotlinx-coroutines = "1.11.0"
+langchain4jLocalAi = "1.11.0-beta19"
 material3 = "1.12.0-alpha03"
 
 koin = "4.2.2"
@@ -24,8 +25,13 @@ room3 = "3.1.0-alpha01"
 sqlite = "2.7.1"
 ksp = "2.3.12"
 
-koogAgents = "1.2.0"
-koogAgentsBeta = "1.2.0-beta"
+koogAgents = "1.3.0"
+koogEmbeddings = "1.4.3"
+koogAgentsBeta = "1.3.0-beta"
+
+langchain4j = "1.20.0"
+langchainAgentic = "1.13.0-beta23"
+logback = "1.6.4"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -48,6 +54,14 @@ compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-previ
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 wrappers-browser = { module = "org.jetbrains.kotlin-wrappers:kotlin-browser", version.ref = "kotlin-wrappers" }
 
+langchain4j-easy-rag = { module = "dev.langchain4j:langchain4j-easy-rag", version.ref = "langchain4jLocalAi" }
+langchain4j-local-ai = { module = "dev.langchain4j:langchain4j-local-ai", version.ref = "langchain4jLocalAi" }
+langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
+langchain4j-open-ai = { module = "dev.langchain4j:langchain4j-open-ai", version.ref = "langchain4j" }
+langchain4j-agentic = {module = "dev.langchain4j:langchain4j-agentic", version.ref="langchainAgentic"}
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+
 lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycleViewModel"}
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
@@ -62,10 +76,12 @@ androidx-room3-runtime = { module = "androidx.room3:room3-runtime", version.ref 
 androidx-room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room3" }
 
 koog-agents = { module = "ai.koog:koog-agents", version.ref = "koogAgents" }
-koog-embeddings = { module = "ai.koog:embeddings-base", version.ref = "koogAgents" }
+koog-embeddings-base = { module = "ai.koog:embeddings-base", version.ref = "koogAgents" }
 koog-rag-base = { module = "ai.koog:rag-base", version.ref = "koogAgents" }
 koog-rag-vector = { module = "ai.koog:rag-vector", version.ref = "koogAgentsBeta" }
-
+koog-agents-additions = {module = "ai.koog:koog-agents-additions", version.ref = "koogAgentsBeta" }
+koog-embeddings-llm = {module="ai.koog:embeddings-llm", version.ref="koogAgents"}
+koog-prompt-executor = {module="ai.koog.prompt:prompt-executor-openai-model", version.ref="koogAgents"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
