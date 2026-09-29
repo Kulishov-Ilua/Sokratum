@@ -20,7 +20,7 @@ interface MessageDao {
 
 
     @Insert
-    suspend fun addMessage(message: Message): Long
+    suspend fun addMessage(message: MessageEntity): Long
 
 
 }

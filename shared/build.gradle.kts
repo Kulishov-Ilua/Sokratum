@@ -9,6 +9,7 @@ plugins {
 
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room3)
+    kotlin("plugin.serialization") version "2.3.10"
 }
 
 kotlin {
@@ -93,8 +94,16 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.navigation.compose)
+            implementation(libs.koin.annotations)
 
             implementation(libs.androidx.room3.runtime)
+
+            implementation(libs.ktor.serialization.kotlinx.json)
+
+            implementation(libs.navigation.compose.v292)
+
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.material3.window.size.class1)
         }
 
         commonTest.dependencies {

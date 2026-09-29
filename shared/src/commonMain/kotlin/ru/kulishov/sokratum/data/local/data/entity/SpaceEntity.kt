@@ -8,6 +8,6 @@ data class SpaceEntity(
     @PrimaryKey val id: Long,
     val name: String,
     val path: String,
-    val storage: FloatArray,
+    val storage: String,
     val lastOpen: Long
 )

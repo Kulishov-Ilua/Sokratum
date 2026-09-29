@@ -9,4 +9,9 @@ actual class ModelRequestRepositoryImpl actual constructor() :
     actual override suspend fun sendMessage(message: ModelRequest): Message? {
         TODO("Not yet implemented")
     }
+
+    actual override suspend fun modelRequest(request: ModelRequest): String? {
+        TODO("Not yet implemented")
+    }
+
 }

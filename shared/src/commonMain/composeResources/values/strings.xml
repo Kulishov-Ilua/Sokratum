@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Sokratum</string>
+    <string name="hello">Hello!</string>
+    <string name="hello_before"> Before starting work,\nit is necessary to connect the model.</string>
+    <string name="help">Help</string>
+    <string name="connecting_the_model">Connecting the model</string>
+    <string name="model_name">Model name</string>
+    <string name="model_name_description">Here, you specify the exact AI model you want to call. For cloud services, you must enter the precise model name used in the API; this is always listed in the provider's documentation. For local models, enter the name of the model you downloaded and are running in your program.\nExample:</string>
+    <string name="model_url">Model URL</string>
+    <string name="model_url_description">If you are using a cloud service, enter the provider's official address here. You can find the exact address in the service's documentation.
+If you are running the model locally on your computer, the address always starts with `http://localhost` and includes the port number displayed by the program itself. You can see this address in the running program's interface.\nExample:</string>
+    <string name="model_key">Key</string>
+    <string name="model_key_description">This is a secret key that verifies your right to use the model.
+For cloud services, the key is issued when you register on the provider's website. It appears as a long string of letters, numbers, and symbols. You need to copy it from your account dashboard and paste it into this field. Keep this key confidential and do not share it with anyone. No key is required for local models running on your computer.\nExample:</string>
+    <string name="model_key_if_nesessary">Key (if necessary)</string>
+    <string name="model_timeout">Timeout</string>
+    <string name="model_timeout_description">Enter a number here representing the time (in seconds) the program will wait for a response from the model before terminating the connection and reporting a connection failure.\nIf the model is fast or you are sending short requests, you can set this to 30 or 60 seconds. If the model is computationally intensive, slow, or generates large amounts of text, it is better to increase the value to 120 or even 180 seconds.\nExample:</string>
+    <string name="model_timeout_placeholder">Server response timeout (in seconds)</string>
+    <string name="skip">Skip</string>
+    <string name="connect_model">Connect model</string>
+    <string name="continue_training">Continue training</string>
+    <string name="back_to_model_settings">Back to model settings</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="the_model_is_not_responding">The model is not responding</string>
+    <string name="check_details">Check the provided details\nand access to the resource</string>
+    <string name="specify_model_parametr">Specify the model parameters</string>
+</resources>
+

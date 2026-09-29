@@ -30,8 +30,8 @@ class ChatRepositoryImpl(
     }
 
     override suspend fun updateChat(chat: Chat): Chat? {
-        val id = chatDao.updateChat(ChatMapper.toEntity(chat))
-        val findChat = chatDao.getChat(id)
+        chatDao.updateChat(ChatMapper.toEntity(chat))
+        val findChat = chatDao.getChat(chat.id)
         if (findChat == null) return null
         else return ChatMapper.toDomain(findChat)
     }
@@ -51,7 +51,7 @@ class ChatRepositoryImpl(
         message: Message
     ): Message? {
         val newMessage = message.copy(sendTime = Clock.System.now().epochSeconds)
-        val id = messageDao.addMessage(message)
+        val id = messageDao.addMessage(MessageMapper.toEntity(message))
         val findMessage = messageDao.getMessage(id)
         if (findMessage == null) return null
         else return MessageMapper.toDomain(findMessage)

@@ -6,8 +6,11 @@ import ru.kulishov.sokratum.domain.model.Model
 object AIModels {
     private val _models = mutableListOf<Model>()
 
-    val modelList: List<Model>
+    var modelList: List<Model>
         get() = _models
+        set(models:List<Model>){
+            _models+=models
+        }
 
     var model: Model
         get() = _models.first()

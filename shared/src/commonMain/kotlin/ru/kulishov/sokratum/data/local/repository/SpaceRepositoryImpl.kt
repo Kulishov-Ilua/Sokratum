@@ -28,8 +28,8 @@ class SpaceRepositoryImpl(
     }
 
     override suspend fun updateSpace(space: Space): Space? {
-        val id = spaceDao.updateSpace(SpaceMapper.toEntity(space))
-        val findSpace = spaceDao.getSpace(id)
+        spaceDao.updateSpace(SpaceMapper.toEntity(space))
+        val findSpace = spaceDao.getSpace(space.id)
         if (findSpace == null) return null
         else return SpaceMapper.toDomain(findSpace)
     }

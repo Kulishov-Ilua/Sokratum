@@ -21,7 +21,7 @@ interface SpaceDao {
     suspend fun addSpace(space: SpaceEntity): Long
 
     @Update
-    suspend fun updateSpace(space: SpaceEntity): Long
+    suspend fun updateSpace(space: SpaceEntity)
 
     @Delete
     suspend fun deleteSpace(space: SpaceEntity)
