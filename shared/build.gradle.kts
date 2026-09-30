@@ -1,5 +1,8 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -40,6 +43,12 @@ kotlin {
        namespace = "ru.kulishov.sokratum.shared"
        compileSdk = libs.versions.android.compileSdk.get().toInt()
        minSdk = libs.versions.android.minSdk.get().toInt()
+
+        packaging{
+            resources {
+                excludes += "META-INF/INDEX.LIST"
+            }
+        }
     
        compilerOptions {
            jvmTarget = JvmTarget.JVM_11
@@ -104,6 +113,7 @@ kotlin {
 
             implementation(libs.kotlinx.datetime)
             implementation(libs.material3.window.size.class1)
+            implementation(libs.logback)
         }
 
         commonTest.dependencies {
