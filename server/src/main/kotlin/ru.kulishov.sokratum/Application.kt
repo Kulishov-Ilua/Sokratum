@@ -11,6 +11,10 @@ import io.ktor.server.application.install
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import ru.kulishov.sokratum.db.DBFactory
+import ru.kulishov.sokratum.db.user.UserDao
+import ru.kulishov.sokratum.jwt.JWTConfig
+import ru.kulishov.sokratum.routings.configureAuthRouting
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -40,22 +44,22 @@ fun Application.module() {
             ignoreUnknownKeys = true
         })
     }
-//    JwtConfig.init(environment)
-//    DBFactory.init(environment)
-//    val userDao = UserDao()
+    JWTConfig.init(environment)
+    DBFactory.init(environment)
+    val userDao = UserDao()
 //    val courseDao = CourseDao()
 //    val taskDao = TaskDao()
 //    val fileDao = FileDao()
 //    val chatDao = ChatDao()
-//    configureSecurity(environment)
-//    configureAuthRouting(userDao)
+    configureSecurity(environment)
+    configureAuthRouting(userDao)
 //    configureCourseRouting(courseDao, userDao, fileDao)
 //    configureTaskRouting(taskDao)
 //    configureChatRouting(chatDao, fileDao)
 //    AIAgent.init(environment)
     routing {
         get("/"){
-            call.respond("Hello ktor")
+            call.respond("Hello Sokratum")
         }
     }
 
