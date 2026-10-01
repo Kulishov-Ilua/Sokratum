@@ -61,9 +61,22 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
             implementation(libs.androidx.sqlite.bundled)
+
+            implementation(libs.langchain4j)
+            implementation(libs.langchain4j.open.ai)
+            implementation(libs.langchain4j.local.ai)
+            implementation(libs.langchain4j.easy.rag)
+            implementation(libs.langchain4j.agentic)
         }
         jvmMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
+
+            implementation(libs.langchain4j)
+            implementation(libs.langchain4j.open.ai)
+            implementation(libs.langchain4j.local.ai)
+            implementation(libs.langchain4j.easy.rag)
+            implementation(libs.langchain4j.agentic)
+
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -82,11 +95,6 @@ kotlin {
             implementation(libs.navigation.compose)
 
             implementation(libs.androidx.room3.runtime)
-            implementation(libs.koog.agents)
-            implementation(libs.koog.embeddings)
-            implementation(libs.koog.rag.base)
-            implementation(libs.koog.rag.vector)
-
         }
 
         commonTest.dependencies {
