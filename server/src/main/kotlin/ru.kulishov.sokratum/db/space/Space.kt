@@ -4,18 +4,27 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.javatime.datetime
+import ru.kulishov.sokratum.db.chat.Chat
 
-object Spaces: Table() {
+object Spaces : Table() {
     val id = integer("id").autoIncrement()
     val name = varchar("name", 255)
-    val lastOpen = datetime("last_open")
+    var lastOpen = datetime("last_open")
 
     override val primaryKey = PrimaryKey(id)
 }
 
 @Serializable
 data class Space(
-    val id:Int,
+    val id: Int,
     val name: String,
     val lastOpen: LocalDateTime
+)
+
+@Serializable
+data class SpaceAndChats(
+    val id: Int,
+    val name: String,
+    val lastOpen: LocalDateTime,
+    val chats: List<Chat>
 )
