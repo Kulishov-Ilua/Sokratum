@@ -37,6 +37,9 @@ class ChatDao {
             .map { rowToChat(it) }
     }
 
+    suspend fun getChat(id:Int): Chat? = query {
+        return@query Chats.selectAll().where{ Chats.id eq id }.map { rowToChat(it) }.firstOrNull()
+    }
     suspend fun getChatAndMessages(chatId: Int): ChatAndMessages? = query {
         val chat =
             Chats.selectAll().where { Chats.id eq chatId }.map { rowToChat(it) }.firstOrNull()
@@ -86,5 +89,6 @@ class ChatDao {
         Chats.deleteWhere { Chats.id eq chat.id }
         return@query true
     }
+
 
 }

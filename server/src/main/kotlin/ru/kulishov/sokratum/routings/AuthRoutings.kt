@@ -12,14 +12,21 @@ import ru.kulishov.sokratum.dto.AuthResponse
 import ru.kulishov.sokratum.dto.LoginRequest
 import ru.kulishov.sokratum.dto.RegistrationRequest
 import ru.kulishov.sokratum.jwt.JWTConfig
+import java.time.LocalDateTime
 
 fun Application.configureAuthRouting(
     userDao: UserDao
 ){
     routing {
         get("/regeneratekey"){
-            JWTConfig.generateRegistrationKey()
-            call.respond(HttpStatusCode.OK)
+            if((LocalDateTime.now().second- JWTConfig.lastUpdateKey)>15){
+                JWTConfig.lastUpdateKey= LocalDateTime.now().second
+                JWTConfig.generateRegistrationKey()
+                call.respond(HttpStatusCode.OK)
+            }else{
+                call.respond(HttpStatusCode.Locked)
+            }
+
         }
         post("/deletekey"){
             JWTConfig.deleteRegistrationKey()

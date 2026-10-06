@@ -16,6 +16,8 @@ object JWTConfig {
 
     private var RegistrationPassword: String? = null
 
+    var lastUpdateKey = LocalDateTime.now().second
+
     fun generateRegistrationKey() {
         RegistrationPassword =
             LocalDateTime.now()

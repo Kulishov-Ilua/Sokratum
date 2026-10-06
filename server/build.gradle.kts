@@ -22,12 +22,12 @@ dependencies {
     testImplementation(libs.kotlin.testJunit)
     implementation(libs.langchain4j)
     implementation(libs.langchain4j.open.ai)
-    implementation("dev.langchain4j:langchain4j-local-ai:1.11.0-beta19")
-    implementation("dev.langchain4j:langchain4j-easy-rag:1.11.0-beta19")
-    implementation("dev.langchain4j:langchain4j-agentic:1.13.0-beta23")
-    implementation("dev.langchain4j:langchain4j-vertex-ai-gemini:1.13.1-beta23")
-    implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.13.1")
-    implementation("chat.giga:langchain4j-gigachat:0.1.20")
+    implementation(libs.langchain4j.local.ai)
+    implementation(libs.langchain4j.easy.rag)
+    implementation(libs.langchain4j.agentic)
+    implementation(libs.langchain4j.vertex.ai.gemini)
+    implementation(libs.langchain4j.google.ai.gemini)
+    implementation(libs.langchain4j.gigachat)
 
     implementation("io.ktor:ktor-server-cors:${ktor}")
 
@@ -41,11 +41,11 @@ dependencies {
     implementation(libs.h2)
     implementation(libs.ktor.server.config.yaml)
 
-    implementation("org.jetbrains.exposed:exposed-core:1.1.1")
-    implementation("org.jetbrains.exposed:exposed-dao:1.1.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:1.1.1")
-    implementation("org.jetbrains.exposed:exposed-java-time:1.1.1")
-    implementation("org.jetbrains.exposed:exposed-crypt:1.1.1")
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.dao)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.java.time)
+    implementation(libs.exposed.crypt)
 
 
 

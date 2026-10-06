@@ -6,6 +6,8 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import ru.kulishov.sokratum.db.chat.ChatDao
+import ru.kulishov.sokratum.db.user.UserDao
 import ru.kulishov.sokratum.db.user.Users
 
 lateinit var keyCrypt: String
@@ -33,6 +35,9 @@ object DBFactory {
             SchemaUtils.create(Users)
         }
     }
+
+    val userDao = UserDao()
+    val chatDao = ChatDao()
 }
 
 suspend fun <T> query(block: () -> T): T = withContext(Dispatchers.IO) {
