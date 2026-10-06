@@ -16,7 +16,7 @@ object JWTConfig {
 
     private var RegistrationPassword: String? = null
 
-    var lastUpdateKey = LocalDateTime.now().second
+    var lastUpdateKey = 0
 
     fun generateRegistrationKey() {
         RegistrationPassword =
@@ -41,6 +41,7 @@ object JWTConfig {
     fun init(environment: ApplicationEnvironment) {
         SECRET = environment.config.property("jwt_secret").getString()
         algorithm = Algorithm.HMAC256(SECRET)
+        LocalDateTime.now().second
     }
 
     fun generateToken(login: String, role: String, userId: Int): String {

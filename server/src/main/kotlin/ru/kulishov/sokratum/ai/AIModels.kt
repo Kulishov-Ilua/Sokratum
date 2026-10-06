@@ -20,6 +20,17 @@ object AIModels {
 
             .build()
 
+        models+="gemma3" to OpenAiChatModel.builder()
+            .baseUrl(env!!.config.property("langchain.url").getString())
+            .modelName(env!!.config.property("langchain.smallModel").getString())
+            //.responseFormat(responseFormat)
+            .temperature(
+                env!!.config.property("langchain.temperature").getString().toDouble()
+            ).timeout(Duration.ofSeconds(360))
+            .logRequests(true)
+            .logResponses(true)
+
+            .build()
     }
 
     val models = mutableMapOf<String, OpenAiChatModel?>()

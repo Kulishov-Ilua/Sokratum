@@ -12,18 +12,22 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import ru.kulishov.sokratum.ai.AIModels
+import ru.kulishov.sokratum.ai.rag.FileStorrage
 import ru.kulishov.sokratum.db.DBFactory
 import ru.kulishov.sokratum.db.DBFactory.chatDao
+import ru.kulishov.sokratum.db.DBFactory.fileDao
+import ru.kulishov.sokratum.db.DBFactory.messageDao
+import ru.kulishov.sokratum.db.DBFactory.spaceDao
 import ru.kulishov.sokratum.db.DBFactory.userDao
 import ru.kulishov.sokratum.db.user.UserDao
 import ru.kulishov.sokratum.jwt.JWTConfig
 import ru.kulishov.sokratum.routings.configureAuthRouting
 import ru.kulishov.sokratum.routings.configureChatRoutings
+import ru.kulishov.sokratum.routings.configureFileRoutings
+import ru.kulishov.sokratum.routings.configureSpaceRouting
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
-    // embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
-    //   .start(wait = true)
 }
 
 fun Application.module() {
@@ -51,17 +55,14 @@ fun Application.module() {
     JWTConfig.init(environment)
     DBFactory.init(environment)
     AIModels.init(environment)
-   // val userDao = UserDao()
-//    val courseDao = CourseDao()
-//    val taskDao = TaskDao()
-//    val fileDao = FileDao()
-   // val chatDao = ChatDao()
+    FileStorrage.init()
+
     configureSecurity(environment)
     configureAuthRouting(userDao)
-//    configureCourseRouting(courseDao, userDao, fileDao)
-//    configureTaskRouting(taskDao)
-     configureChatRoutings(chatDao)
-//    AIAgent.init(environment)
+    configureChatRoutings(chatDao, messageDao)
+    configureSpaceRouting(spaceDao)
+    configureFileRoutings(fileDao)
+
 
 
     routing {

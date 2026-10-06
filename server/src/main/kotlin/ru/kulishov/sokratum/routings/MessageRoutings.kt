@@ -15,7 +15,7 @@ fun Application.configureMessageRoutings(
 ) {
     routing {
         authenticate("auth-jwt") {
-            post("/addSpace") {
+            post("/addMessage") {
                 val body = call.receive<Message>()
                 val respond = messageDao.addMessage(body)
                 if (respond != null) call.respond(HttpStatusCode.OK, respond)

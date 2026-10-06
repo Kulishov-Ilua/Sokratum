@@ -1,4 +1,4 @@
-package ru.kulishov.sokratum.routings
+    package ru.kulishov.sokratum.routings
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application

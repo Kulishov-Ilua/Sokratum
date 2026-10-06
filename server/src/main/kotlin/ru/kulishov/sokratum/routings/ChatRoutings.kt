@@ -12,6 +12,7 @@ import io.ktor.server.routing.routing
 import kotlinx.datetime.toKotlinLocalDateTime
 import ru.kulishov.sokratum.ai.AIModels
 import ru.kulishov.sokratum.ai.ExpertAgent
+import ru.kulishov.sokratum.ai.rag.RAG
 import ru.kulishov.sokratum.db.chat.Chat
 import ru.kulishov.sokratum.db.chat.ChatDao
 import ru.kulishov.sokratum.db.message.Message
@@ -59,46 +60,53 @@ fun Application.configureChatRoutings(
                 else call.respond(HttpStatusCode.Conflict)
             }
 
-            get("/getModels"){
+            get("/getModels") {
                 call.respond(HttpStatusCode.OK, AIModels.models.keys)
             }
 
             post("/sendMessage") {
                 val body = call.receive<SendMessageRequest>()
-                messageDao.addMessage(Message(
-                    id = -1,
-                    idChat = body.chatId,
-                    isModel = false,
-                    text = body.text,
-                    sendTime = LocalDateTime.now().toKotlinLocalDateTime()
-                ))
+                messageDao.addMessage(
+                    Message(
+                        id = -1,
+                        idChat = body.chatId,
+                        isModel = false,
+                        text = body.text,
+                        sendTime = LocalDateTime.now().toKotlinLocalDateTime()
+                    )
+                )
                 val findModel = AIModels.models[body.model]
                 val findChat = chatDao.getChat(body.chatId)
-                if(findModel!=null && findChat!=null){
+                if (findModel != null && findChat != null) {
+                    val retriever = RAG.getRetriever(findChat.spaceId)
+
                     var agent = AgenticServices
                         .agentBuilder(ExpertAgent::class.java)
                         .chatModel(findModel)
                         .outputKey("response")
-                        .systemMessage(findChat.systemPrompt)
+                        .systemMessage(if (findChat.systemPrompt.isNotBlank()) findChat.systemPrompt else "Ответь на вопрос пользователя")
+                        .contentRetriever(retriever)
                         .build()
-                    val answer = findModel.chat(body.text)
-                    if(answer!=null){
-                        val message =messageDao.addMessage(Message(
-                            id = -1,
-                            idChat = body.chatId,
-                            isModel = true,
-                            text = answer,
-                            sendTime = LocalDateTime.now().toKotlinLocalDateTime()
-                        ))
-                        if(message!=null){
+                    val answer = agent.chat(body.text)
+                    if (answer != null) {
+                        val message = messageDao.addMessage(
+                            Message(
+                                id = -1,
+                                idChat = body.chatId,
+                                isModel = true,
+                                text = answer,
+                                sendTime = LocalDateTime.now().toKotlinLocalDateTime()
+                            )
+                        )
+                        if (message != null) {
                             call.respond(HttpStatusCode.OK, message)
-                        }else{
+                        } else {
                             call.respond(HttpStatusCode.NotModified)
                         }
-                    }else{
+                    } else {
                         call.respond(HttpStatusCode.RequestTimeout)
                     }
-                }else{
+                } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
             }

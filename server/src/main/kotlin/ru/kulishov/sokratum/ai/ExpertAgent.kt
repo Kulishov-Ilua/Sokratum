@@ -1,7 +1,6 @@
 package ru.kulishov.sokratum.ai
 
 import dev.langchain4j.agentic.Agent
-import dev.langchain4j.service.SystemMessage
 import dev.langchain4j.service.UserMessage
 
 interface ExpertAgent {
