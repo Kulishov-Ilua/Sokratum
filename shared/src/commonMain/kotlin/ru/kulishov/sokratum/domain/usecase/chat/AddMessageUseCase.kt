@@ -6,6 +6,6 @@ import ru.kulishov.sokratum.domain.repository.ChatRepository
 class AddMessageUseCase(
     private val repository: ChatRepository
 ) {
-    suspend operator fun invoke(chatId: Long, message: String): Message? =
-        repository.addMessage(chatId, message)
+    suspend operator fun invoke(message: Message): Message? =
+        repository.addMessage(message)
 }

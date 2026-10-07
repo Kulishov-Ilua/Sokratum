@@ -1,5 +1,8 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -9,6 +12,7 @@ plugins {
 
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room3)
+    kotlin("plugin.serialization") version "2.3.10"
 }
 
 kotlin {
@@ -39,6 +43,12 @@ kotlin {
        namespace = "ru.kulishov.sokratum.shared"
        compileSdk = libs.versions.android.compileSdk.get().toInt()
        minSdk = libs.versions.android.minSdk.get().toInt()
+
+        packaging{
+            resources {
+                excludes += "META-INF/INDEX.LIST"
+            }
+        }
     
        compilerOptions {
            jvmTarget = JvmTarget.JVM_11
@@ -93,8 +103,17 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.navigation.compose)
+            implementation(libs.koin.annotations)
 
             implementation(libs.androidx.room3.runtime)
+
+            implementation(libs.ktor.serialization.kotlinx.json)
+
+            implementation(libs.navigation.compose.v292)
+
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.material3.window.size.class1)
+            implementation(libs.logback)
         }
 
         commonTest.dependencies {

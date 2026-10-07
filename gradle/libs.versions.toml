@@ -10,17 +10,25 @@ androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.11.0"
 androidx-testExt = "1.3.0"
 composeMultiplatform = "1.12.0"
+exposedCore = "1.5.0"
 junit = "4.13.2"
 kotlin = "2.4.20"
 kotlin-wrappers = "2026.9.1"
 kotlinx-coroutines = "1.11.0"
+kotlinxDatetime = "0.8.0"
+ktorSerializationKotlinxJson = "3.6.0"
+langchain4jGoogleAiGemini = "1.21.0"
+langchain4jGigachat = "0.1.24"
 langchain4jLocalAi = "1.11.0-beta19"
+langchain4jVertexAiGemini = "1.13.1-beta23"
 material3 = "1.12.0-alpha03"
 
 koin = "4.2.2"
+material3WindowSizeClass = "1.9.0"
 navigationCompose = "2.9.1"
 lifecycleViewModel = "2.11.0"
 
+navigationComposeVersion = "2.9.2"
 room3 = "3.1.0-alpha01"
 sqlite = "2.7.1"
 ksp = "2.3.12"
@@ -33,7 +41,16 @@ langchain4j = "1.20.0"
 langchainAgentic = "1.13.0-beta23"
 logback = "1.6.4"
 
+postgres = "42.7.10"
+ktor = "3.3.3"
+h2 = "2.3.232"
+
 [libraries]
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposedCore" }
+exposed-crypt = { module = "org.jetbrains.exposed:exposed-crypt", version.ref = "exposedCore" }
+exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposedCore" }
+exposed-java-time = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposedCore" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposedCore" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }
@@ -52,6 +69,13 @@ compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMul
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
+langchain4j-gigachat = { module = "chat.giga:langchain4j-gigachat", version.ref = "langchain4jGigachat" }
+langchain4j-google-ai-gemini = { module = "dev.langchain4j:langchain4j-google-ai-gemini", version.ref = "langchain4jGoogleAiGemini" }
+langchain4j-vertex-ai-gemini = { module = "dev.langchain4j:langchain4j-vertex-ai-gemini", version.ref = "langchain4jVertexAiGemini" }
+material3-window-size-class1 = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "material3WindowSizeClass" }
+navigation-compose-v292 = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 wrappers-browser = { module = "org.jetbrains.kotlin-wrappers:kotlin-browser", version.ref = "kotlin-wrappers" }
 
 langchain4j-easy-rag = { module = "dev.langchain4j:langchain4j-easy-rag", version.ref = "langchain4jLocalAi" }
@@ -68,6 +92,7 @@ koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", versi
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
@@ -83,6 +108,19 @@ koog-agents-additions = {module = "ai.koog:koog-agents-additions", version.ref =
 koog-embeddings-llm = {module="ai.koog:embeddings-llm", version.ref="koogAgents"}
 koog-prompt-executor = {module="ai.koog.prompt:prompt-executor-openai-model", version.ref="koogAgents"}
 
+ktor-server-sessions = { module = "io.ktor:ktor-server-sessions", version.ref = "ktor" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-client-apache = { module = "io.ktor:ktor-client-apache", version.ref = "ktor" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+h2 = { module = "com.h2database:h2", version.ref = "h2" }
+ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-serverCore = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
+ktor-serverNetty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
+ktor-serverTestHost = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
+
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
@@ -93,3 +131,6 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidx-room3 = { id = "androidx.room3", version.ref = "room3" }
+
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

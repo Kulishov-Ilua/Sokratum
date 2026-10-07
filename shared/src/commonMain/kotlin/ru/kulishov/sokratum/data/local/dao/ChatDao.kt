@@ -10,7 +10,7 @@ import ru.kulishov.sokratum.data.local.data.entity.ChatEntity
 
 @Dao
 interface ChatDao {
-    @Query("Select * from chats where idSpace = :spaceID")
+    @Query("Select * from chats where idSpace = :spaceId")
     fun getChatsData(spaceId: Long): Flow<List<ChatEntity>>
 
     @Query("select * FROM chats ORDER BY lastOpen DESC limit 10")
@@ -23,7 +23,7 @@ interface ChatDao {
     suspend fun addChat(chat: ChatEntity): Long
 
     @Update
-    suspend fun updateChat(chat: ChatEntity): Long
+    suspend fun updateChat(chat: ChatEntity)
 
     @Delete
     suspend fun deleteChat(chat: ChatEntity)

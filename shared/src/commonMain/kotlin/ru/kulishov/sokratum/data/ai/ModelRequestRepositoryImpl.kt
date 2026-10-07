@@ -6,4 +6,5 @@ import ru.kulishov.sokratum.domain.repository.ModelRequestRepository
 
 expect class ModelRequestRepositoryImpl(): ModelRequestRepository {
      override suspend fun sendMessage(message: ModelRequest): Message?
+     override suspend fun modelRequest(request: ModelRequest): String?
 }
