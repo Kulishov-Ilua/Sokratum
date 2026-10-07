@@ -8,16 +8,12 @@ object SpaceMapper {
     fun toDomain(entity: SpaceEntity): Space = Space(
         id = entity.id,
         name = entity.name,
-        path = entity.path,
-        storage = entity.storage,
         lastOpen = entity.lastOpen
     )
 
     fun toEntity(domain: Space): SpaceEntity = SpaceEntity(
         id = domain.id,
         name = domain.name,
-        path = domain.path,
-        storage = domain.storage,
         lastOpen = domain.lastOpen
     )
 

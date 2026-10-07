@@ -7,12 +7,13 @@ import androidx.room3.Query
 import androidx.room3.Update
 import kotlinx.coroutines.flow.Flow
 import ru.kulishov.sokratum.data.local.data.entity.SpaceEntity
+import ru.kulishov.sokratum.domain.model.Space
 import ru.kulishov.sokratum.domain.model.SpaceWithoutStorage
 
 @Dao
 interface SpaceDao {
-    @Query("SELECT id, name, path, lastOpen FROM spaces ORDER BY lastOpen DESC")
-    fun getSpaces(): Flow<List<SpaceWithoutStorage>>
+    @Query("SELECT * FROM spaces ORDER BY lastOpen DESC")
+    suspend fun getSpaces(): List<SpaceEntity>
 
     @Query("SELECT * from spaces where id = :spaceId")
     suspend fun getSpace(spaceId: Long): SpaceEntity?

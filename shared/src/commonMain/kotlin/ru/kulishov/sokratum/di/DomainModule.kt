@@ -15,7 +15,7 @@ import ru.kulishov.sokratum.domain.usecase.model.DeleteModelUseCase
 import ru.kulishov.sokratum.domain.usecase.model.GetModelsUseCase
 import ru.kulishov.sokratum.domain.usecase.space.AddSpaceUseCase
 import ru.kulishov.sokratum.domain.usecase.space.DeleteSpaceUseCase
-import ru.kulishov.sokratum.domain.usecase.space.GetSpaceDataUseCase
+import ru.kulishov.sokratum.domain.usecase.space.GetSpaceAndChatsUseCase
 import ru.kulishov.sokratum.domain.usecase.space.GetSpacesDataUseCase
 import ru.kulishov.sokratum.domain.usecase.space.UpdateSpaceUseCase
 
@@ -48,7 +48,7 @@ val domainModlule = module {
         )
     }
     factory {
-        GetSpaceDataUseCase(
+        GetSpaceAndChatsUseCase(
             repository = get()
         )
     }

@@ -114,6 +114,11 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.material3.window.size.class1)
             implementation(libs.logback)
+
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.content.negotiation)
+
         }
 
         commonTest.dependencies {
@@ -121,9 +126,13 @@ kotlin {
         }
         nativeMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.ktor.client.darwin)
         }
         webMain.dependencies {
             implementation(libs.androidx.sqlite.bundled.web)
+            implementation(libs.ktor.client.js)
+            implementation(libs.kotlinx.browser)
+
         }
     }
 }

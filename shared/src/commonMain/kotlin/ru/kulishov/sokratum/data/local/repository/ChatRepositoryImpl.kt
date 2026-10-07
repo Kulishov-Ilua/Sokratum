@@ -16,11 +16,9 @@ class ChatRepositoryImpl(
     private val chatDao: ChatDao,
     private val messageDao: MessageDao
 ) : ChatRepository {
-    override fun getChatsData(spaceId: Long): Flow<List<Chat>> =
-        chatDao.getChatsData(spaceId).map { entity -> entity.map { ChatMapper.toDomain(it) } }
 
-    override fun getLastChats(): Flow<List<Chat>> =
-        chatDao.getLastChats().map { entity -> entity.map { ChatMapper.toDomain(it) } }
+    override suspend fun getLastChats(): List<Chat> =
+        chatDao.getLastChats().map { ChatMapper.toDomain(it) }
 
     override suspend fun addChat(chat: Chat): Chat? {
         val id = chatDao.addChat(ChatMapper.toEntity(chat))
@@ -57,9 +55,9 @@ class ChatRepositoryImpl(
         else return MessageMapper.toDomain(findMessage)
     }
 
-    override fun updateMessages(
+    override suspend fun updateMessages(
         chatId: Long,
         updateTime: Long
-    ): Flow<List<Message>> = messageDao.updateMessages(chatId, updateTime)
-        .map { entity -> entity.map { MessageMapper.toDomain(it) } }
+    ): List<Message> = messageDao.updateMessages(chatId, updateTime)
+        .map {MessageMapper.toDomain(it) }
 }

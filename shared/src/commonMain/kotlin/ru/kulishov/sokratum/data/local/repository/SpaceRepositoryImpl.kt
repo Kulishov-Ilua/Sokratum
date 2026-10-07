@@ -5,19 +5,22 @@ import kotlinx.coroutines.flow.map
 import ru.kulishov.sokratum.data.local.dao.SpaceDao
 import ru.kulishov.sokratum.data.local.data.mapper.SpaceMapper
 import ru.kulishov.sokratum.domain.model.Space
+import ru.kulishov.sokratum.domain.model.SpaceAndChats
 import ru.kulishov.sokratum.domain.model.SpaceWithoutStorage
 import ru.kulishov.sokratum.domain.repository.SpaceRepository
 
 class SpaceRepositoryImpl(
     private val spaceDao: SpaceDao
 ) : SpaceRepository {
-    override fun getSpacesData(): Flow<List<SpaceWithoutStorage>> =
-        spaceDao.getSpaces().map { entity -> entity.map { SpaceMapper.toDomainWithoutStorage(it) } }
+    override suspend fun getSpacesData(): List<Space> =
+        spaceDao.getSpaces().map { SpaceMapper.toDomain(it) }
 
-    override suspend fun getSpaceData(spaceId: Long): Space? {
-        val entity = spaceDao.getSpace(spaceId)
-        if (entity == null) return null
-        else return SpaceMapper.toDomain(entity)
+    override suspend fun getSpaceAndChats(spaceId: Long): SpaceAndChats? {
+        //todo add db realization
+        return null
+//        val entity = spaceDao.getSpace(spaceId)
+//        if (entity == null) return null
+//        else return SpaceMapper.toDomain(entity)
     }
 
     override suspend fun addSpace(space: Space): Space? {

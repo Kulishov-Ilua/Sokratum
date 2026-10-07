@@ -11,10 +11,10 @@ import ru.kulishov.sokratum.data.local.data.entity.ChatEntity
 @Dao
 interface ChatDao {
     @Query("Select * from chats where idSpace = :spaceId")
-    fun getChatsData(spaceId: Long): Flow<List<ChatEntity>>
+    suspend fun getChatsData(spaceId: Long): List<ChatEntity>
 
     @Query("select * FROM chats ORDER BY lastOpen DESC limit 10")
-    fun getLastChats(): Flow<List<ChatEntity>>
+    suspend fun getLastChats(): List<ChatEntity>
 
     @Query("Select * from chats where id = :id")
     suspend fun getChat(id: Long): ChatEntity?

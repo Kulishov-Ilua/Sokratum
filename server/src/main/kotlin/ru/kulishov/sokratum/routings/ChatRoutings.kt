@@ -110,6 +110,16 @@ fun Application.configureChatRoutings(
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
+            post("/request") {
+                val body = call.receive<String>()
+                val models = AIModels.models.values
+                if(models.isNotEmpty()&&models.first()!=null){
+                    val answer = models.first()?.chat(body)?: ""
+                    if(answer.isNotBlank()){
+                        call.respond(HttpStatusCode.OK, answer)
+                    }else call.respond(HttpStatusCode.InternalServerError)
+                }else call.respond(HttpStatusCode.NotFound)
+            }
         }
     }
 }
