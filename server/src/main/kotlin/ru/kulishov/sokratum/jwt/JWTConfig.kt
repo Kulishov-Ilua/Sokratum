@@ -38,6 +38,7 @@ object JWTConfig {
         return false
     }
 
+    fun getRegistrationKey():String = RegistrationPassword?:""
     fun init(environment: ApplicationEnvironment) {
         SECRET = environment.config.property("jwt_secret").getString()
         algorithm = Algorithm.HMAC256(SECRET)

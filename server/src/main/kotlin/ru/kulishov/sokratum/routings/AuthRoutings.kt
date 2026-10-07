@@ -2,6 +2,7 @@ package ru.kulishov.sokratum.routings
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
@@ -70,6 +71,16 @@ fun Application.configureAuthRouting(
                     HttpStatusCode.Unauthorized,
                     mapOf("error" to "Invalid username or password")
                 )
+            }
+        }
+        authenticate("auth-jwt") {
+            get("/getRegistrationKey"){
+                JWTConfig.generateRegistrationKey()
+                call.respond(HttpStatusCode.OK, JWTConfig.getRegistrationKey())
+            }
+
+            get("/devices"){
+                call.respond(HttpStatusCode.OK, userDao.getDevicesData())
             }
         }
     }

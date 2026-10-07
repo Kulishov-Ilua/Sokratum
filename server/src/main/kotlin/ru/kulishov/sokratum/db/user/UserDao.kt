@@ -5,6 +5,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import ru.kulishov.sokratum.db.query
+import ru.kulishov.sokratum.dto.auth.DeviceDataResponse
 
 class UserDao {
     fun rowToUser(row: ResultRow) = User(
@@ -41,5 +42,13 @@ class UserDao {
                 return@query false
             }
         }
+
+    suspend fun getDevicesData():List<DeviceDataResponse> = query {
+        return@query Users.selectAll().map { DeviceDataResponse(
+            id = it[Users.id],
+            login = it[Users.login],
+            device = it[Users.device]
+        ) }
+    }
 
 }
