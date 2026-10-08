@@ -13,6 +13,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room3)
     kotlin("plugin.serialization") version "2.3.10"
+
+    alias(libs.plugins.koin.compiler)
 }
 
 kotlin {
@@ -49,7 +51,7 @@ kotlin {
                 excludes += "META-INF/INDEX.LIST"
             }
         }
-    
+
        compilerOptions {
            jvmTarget = JvmTarget.JVM_11
        }
@@ -68,15 +70,9 @@ kotlin {
     
     sourceSets {
         androidMain.dependencies {
-            implementation(libs.compose.uiToolingPreview)
-            implementation(libs.compose.uiTooling)
+//            implementation(libs.compose.uiToolingPreview)
+//            implementation(libs.compose.uiTooling)
             implementation(libs.androidx.sqlite.bundled)
-
-            implementation(libs.langchain4j)
-            implementation(libs.langchain4j.open.ai)
-            implementation(libs.langchain4j.local.ai)
-            implementation(libs.langchain4j.easy.rag)
-            implementation(libs.langchain4j.agentic)
         }
         jvmMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
@@ -113,7 +109,7 @@ kotlin {
 
             implementation(libs.kotlinx.datetime)
             implementation(libs.material3.window.size.class1)
-            implementation(libs.logback)
+            //implementation(libs.logback)
 
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)

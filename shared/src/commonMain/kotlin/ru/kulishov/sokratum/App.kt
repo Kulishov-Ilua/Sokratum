@@ -1,34 +1,36 @@
 package ru.kulishov.sokratum
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
-import ru.kulishov.sokratum.ui.modelScreen.ModelScreenUI
-import ru.kulishov.sokratum.ui.modelScreen.ModelScreenViewModel
-
-import sokratum.shared.generated.resources.Res
-import sokratum.shared.generated.resources.compose_multiplatform
+import org.koin.plugin.module.dsl.koinApplication
+import ru.kulishov.sokratum.ui.DeviceData
+import ru.kulishov.sokratum.ui.authScreen.AuthScreenUI
+import ru.kulishov.sokratum.ui.authScreen.AuthScreenViewModel
+import ru.kulishov.sokratum.ui.navigation.NavigationRoutes
 
 @Composable
 @Preview
 fun App(
     onNavHostReady: suspend (NavController) -> Unit = {}
 ) {
+    val windowWidth = LocalWindowInfo.current.containerDpSize.width
+
+    val platform = if (windowWidth < 600.dp) DeviceData.Platforms.Phone(
+        DeviceData.OS.NotFound,
+        ""
+    ) else DeviceData.Platforms.Desktop(DeviceData.OS.NotFound, "${windowWidth.value.toInt()}")
+    val width = 1195
+
     val navController = rememberNavController()
 
     LaunchedEffect(navController) {
@@ -36,31 +38,20 @@ fun App(
     }
 
     MaterialTheme {
-        ModelScreenUI(
-            viewModel = koinViewModel<ModelScreenViewModel>(),
-            navController = navController
+        Scaffold(
+            content = { paddingValues ->
+                NavHost(navController, startDestination = NavigationRoutes.AuthScreen){
+                    composable<NavigationRoutes.AuthScreen> {
+                        AuthScreenUI(
+                            viewModel = koinViewModel<AuthScreenViewModel>(),
+                            authSuccess = {navController.navigate(NavigationRoutes.HomeScreen)}
+                        )
+                    }
+                    composable<NavigationRoutes.HomeScreen> { 
+                        
+                    }
+                }
+            }
         )
-//        var showContent by remember { mutableStateOf(false) }
-//        Column(
-//            modifier = Modifier
-//                .background(MaterialTheme.colorScheme.primaryContainer)
-//                .safeContentPadding()
-//                .fillMaxSize(),
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//        ) {
-//            Button(onClick = { showContent = !showContent }) {
-//                Text("Click me!")
-//            }
-//            AnimatedVisibility(showContent) {
-//                val greeting = remember { Greeting().greet() }
-//                Column(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalAlignment = Alignment.CenterHorizontally,
-//                ) {
-//                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-//                    Text("Compose: $greeting")
-//                }
-//            }
-//        }
     }
 }

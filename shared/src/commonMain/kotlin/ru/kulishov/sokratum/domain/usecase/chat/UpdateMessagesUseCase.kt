@@ -7,6 +7,6 @@ import ru.kulishov.sokratum.domain.repository.ChatRepository
 class UpdateMessagesUseCase(
     private val repository: ChatRepository
 ) {
-    operator fun invoke(chatId: Long, updateTime: Long): Flow<List<Message>> =
+    suspend operator fun invoke(chatId: Long, updateTime: Long): List<Message> =
         repository.updateMessages(chatId, updateTime)
 }

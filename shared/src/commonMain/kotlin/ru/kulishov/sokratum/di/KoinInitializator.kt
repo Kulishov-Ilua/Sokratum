@@ -9,7 +9,9 @@ fun initKoin(
     startKoin {
         config?.invoke(this)
         modules(
-            platformDatabaseModule()
+            //platformDatabaseModule()
+            domainModlule,
+            uiModule
         )
     }
 }

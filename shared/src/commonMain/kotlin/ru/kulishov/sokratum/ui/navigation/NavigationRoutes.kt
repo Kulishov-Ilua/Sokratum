@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 sealed class NavigationRoutes{
     @Serializable
-    object ModelScreen: NavigationRoutes()
+    object AuthScreen: NavigationRoutes()
 
     @Serializable
     object HomeScreen: NavigationRoutes()

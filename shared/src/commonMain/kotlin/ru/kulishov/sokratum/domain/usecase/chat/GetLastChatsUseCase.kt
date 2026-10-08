@@ -7,5 +7,5 @@ import ru.kulishov.sokratum.domain.repository.ChatRepository
 class GetLastChatsUseCase(
     private val repository: ChatRepository
 ) {
-    operator fun invoke(): Flow<List<Chat>> = repository.getLastChats()
+    suspend operator fun invoke(): List<Chat> = repository.getLastChats()
 }

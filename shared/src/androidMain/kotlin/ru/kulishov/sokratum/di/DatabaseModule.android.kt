@@ -9,11 +9,11 @@ import ru.kulishov.sokratum.data.local.getDriver
 import ru.kulishov.sokratum.data.local.getRoomDatabase
 
 actual fun platformDatabaseModule(): Module = module {
-    single<SQLiteDriver> { getDriver() }
-    single<AppDatabase> { getRoomDatabase(get(), androidContext()) }
-
-    single { get<AppDatabase>().modelDao() }
-    single { get<AppDatabase>().spaceDao() }
-    single { get<AppDatabase>().chatDao() }
-    single { get<AppDatabase>().messageDao() }
+//    single<SQLiteDriver> { getDriver() }
+//    single<AppDatabase> { getRoomDatabase(get(), androidContext()) }
+//
+//    single { get<AppDatabase>().modelDao() }
+//    single { get<AppDatabase>().spaceDao() }
+//    single { get<AppDatabase>().chatDao() }
+//    single { get<AppDatabase>().messageDao() }
 }

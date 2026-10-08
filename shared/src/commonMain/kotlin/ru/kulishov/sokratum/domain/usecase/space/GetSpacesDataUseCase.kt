@@ -8,5 +8,5 @@ import ru.kulishov.sokratum.domain.repository.SpaceRepository
 class GetSpacesDataUseCase(
     private val repository: SpaceRepository
 ) {
-    operator fun invoke(): Flow<List<SpaceWithoutStorage>> = repository.getSpacesData()
+    suspend operator fun invoke(): List<Space> = repository.getSpacesData()
 }

@@ -5,5 +5,5 @@ import ru.kulishov.sokratum.data.ai.ModelRequestRepositoryImpl
 import ru.kulishov.sokratum.domain.repository.ModelRequestRepository
 
 val aiModule = module {
-    single<ModelRequestRepository> { ModelRequestRepositoryImpl() }
+    //single<ModelRequestRepository> { ModelRequestRepositoryImpl() }
 }
