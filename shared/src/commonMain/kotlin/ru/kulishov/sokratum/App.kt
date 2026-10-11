@@ -1,9 +1,12 @@
 package ru.kulishov.sokratum
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,17 +43,20 @@ fun App(
     MaterialTheme {
         Scaffold(
             content = { paddingValues ->
-                NavHost(navController, startDestination = NavigationRoutes.AuthScreen){
-                    composable<NavigationRoutes.AuthScreen> {
-                        AuthScreenUI(
-                            viewModel = koinViewModel<AuthScreenViewModel>(),
-                            authSuccess = {navController.navigate(NavigationRoutes.HomeScreen)}
-                        )
-                    }
-                    composable<NavigationRoutes.HomeScreen> { 
-                        
+                Box(Modifier.padding(paddingValues)){
+                    NavHost(navController, startDestination = NavigationRoutes.AuthScreen){
+                        composable<NavigationRoutes.AuthScreen> {
+                            AuthScreenUI(
+                                viewModel = koinViewModel<AuthScreenViewModel>(),
+                                authSuccess = {navController.navigate(NavigationRoutes.HomeScreen)}
+                            )
+                        }
+                        composable<NavigationRoutes.HomeScreen> {
+
+                        }
                     }
                 }
+
             }
         )
     }

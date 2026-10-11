@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.ktor.http.HttpStatusCode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -53,7 +54,7 @@ fun AuthScreenUI(
     viewModel: AuthScreenViewModel,
     authSuccess: () -> Unit
 ) {
-    val uiState = viewModel.uiState.collectAsState()
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
     if (uiState.value == AuthScreenViewModel.AuthScreenState.AuthSuccesss) {
         authSuccess()

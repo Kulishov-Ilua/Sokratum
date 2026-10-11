@@ -12,52 +12,52 @@ import ru.kulishov.sokratum.domain.model.Message
 import ru.kulishov.sokratum.domain.repository.ChatRepository
 import kotlin.time.Clock
 
-class ChatRepositoryImpl(
-    private val chatDao: ChatDao,
-    private val messageDao: MessageDao
-) : ChatRepository {
-
-    override suspend fun getLastChats(): List<Chat> =
-        chatDao.getLastChats().map { ChatMapper.toDomain(it) }
-
-    override suspend fun addChat(chat: Chat): Chat? {
-        val id = chatDao.addChat(ChatMapper.toEntity(chat))
-        val findChat = chatDao.getChat(id)
-        if (findChat == null) return null
-        else return ChatMapper.toDomain(findChat)
-    }
-
-    override suspend fun updateChat(chat: Chat): Chat? {
-        chatDao.updateChat(ChatMapper.toEntity(chat))
-        val findChat = chatDao.getChat(chat.id)
-        if (findChat == null) return null
-        else return ChatMapper.toDomain(findChat)
-    }
-
-    override suspend fun deleteChat(chat: Chat) = chatDao.deleteChat(ChatMapper.toEntity(chat))
-
-    override suspend fun getChat(chatId: Long): ChatAndMessages? {
-        val findChat = chatDao.getChat(chatId)
-        if (findChat == null) return null
-        else {
-            val messages = messageDao.getChatMessages(chatId)
-            return ChatMapper.toChatAndMessages(findChat, messages)
-        }
-    }
-
-    override suspend fun addMessage(
-        message: Message
-    ): Message? {
-        val newMessage = message.copy(sendTime = Clock.System.now().epochSeconds)
-        val id = messageDao.addMessage(MessageMapper.toEntity(message))
-        val findMessage = messageDao.getMessage(id)
-        if (findMessage == null) return null
-        else return MessageMapper.toDomain(findMessage)
-    }
-
-    override suspend fun updateMessages(
-        chatId: Long,
-        updateTime: Long
-    ): List<Message> = messageDao.updateMessages(chatId, updateTime)
-        .map {MessageMapper.toDomain(it) }
-}
+//class ChatRepositoryImpl(
+//    private val chatDao: ChatDao,
+//    private val messageDao: MessageDao
+//) : ChatRepository {
+//
+//    override  fun getLastChats(): Flow<List<Chat>> =
+//        chatDao.getLastChats().map { entity->entity.map{ChatMapper.toDomain(it) }}
+//
+//    override suspend fun addChat(chat: Chat): Chat? {
+//        val id = chatDao.addChat(ChatMapper.toEntity(chat))
+//        val findChat = chatDao.getChat(id)
+//        if (findChat == null) return null
+//        else return ChatMapper.toDomain(findChat)
+//    }
+//
+//    override suspend fun updateChat(chat: Chat): Chat? {
+//        chatDao.updateChat(ChatMapper.toEntity(chat))
+//        val findChat = chatDao.getChat(chat.id)
+//        if (findChat == null) return null
+//        else return ChatMapper.toDomain(findChat)
+//    }
+//
+//    override suspend fun deleteChat(chat: Chat) = chatDao.deleteChat(ChatMapper.toEntity(chat))
+//
+//    override suspend fun getChat(chatId: Long): ChatAndMessages? {
+//        val findChat = chatDao.getChat(chatId)
+//        if (findChat == null) return null
+//        else {
+//            val messages = messageDao.getChatMessages(chatId)
+//            return ChatMapper.toChatAndMessages(findChat, messages)
+//        }
+//    }
+//
+//    override suspend fun addMessage(
+//        message: Message
+//    ): Message? {
+//        val newMessage = message.copy(sendTime = Clock.System.now().epochSeconds)
+//        val id = messageDao.addMessage(MessageMapper.toEntity(message))
+//        val findMessage = messageDao.getMessage(id)
+//        if (findMessage == null) return null
+//        else return MessageMapper.toDomain(findMessage)
+//    }
+//
+//    override suspend fun updateMessages(
+//        chatId: Long,
+//        updateTime: Long
+//    ): List<Message> = messageDao.updateMessages(chatId, updateTime)
+//        .map {MessageMapper.toDomain(it) }
+//}

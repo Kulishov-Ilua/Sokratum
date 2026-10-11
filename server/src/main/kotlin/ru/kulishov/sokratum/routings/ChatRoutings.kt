@@ -30,6 +30,10 @@ fun Application.configureChatRoutings(
                 call.respond(HttpStatusCode.OK, chatDao.getLastChats())
             }
 
+            get("/getAllChats") {
+                call.respond(HttpStatusCode.OK, chatDao.getAllChats())
+            }
+
             get("/getChatAndMessages/{chatId}") {
                 val chatId = call.parameters["chatId"]?.toIntOrNull()
                 if (chatId != null) {

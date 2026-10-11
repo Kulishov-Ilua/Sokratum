@@ -36,6 +36,10 @@ class ChatDao {
         return@query Chats.selectAll().orderBy(Chats.lastOpen, SortOrder.DESC).limit(10)
             .map { rowToChat(it) }
     }
+    suspend fun getAllChats(): List<Chat> = query {
+        return@query Chats.selectAll().orderBy(Chats.lastOpen, SortOrder.DESC)
+            .map { rowToChat(it) }
+    }
 
     suspend fun getChat(id:Int): Chat? = query {
         return@query Chats.selectAll().where{ Chats.id eq id }.map { rowToChat(it) }.firstOrNull()

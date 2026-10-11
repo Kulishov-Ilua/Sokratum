@@ -67,7 +67,7 @@ fun Application.module() {
 
     routing {
         get("/"){
-            call.respond("Hello Sokratum")
+            call.respond("Hello Sokratum!!")
         }
 
     }
