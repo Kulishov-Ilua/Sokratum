@@ -1,10 +1,8 @@
 package ru.kulishov.sokratum.data.local.data.mapper
 
-import io.ktor.client.request.invoke
-import io.ktor.util.reflect.instanceOf
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.parseOrNull
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import ru.kulishov.sokratum.data.local.data.entity.ChatEntity
 import ru.kulishov.sokratum.data.local.data.entity.MessageEntity
@@ -13,22 +11,23 @@ import ru.kulishov.sokratum.domain.model.ChatAndMessages
 import ru.kulishov.sokratum.domain.model.Message
 import ru.kulishov.sokratum.domain.model.MessagesAndUpdateTime
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 object ChatMapper {
     fun toDomain(entity: ChatEntity): Chat = Chat(
         id = entity.id,
-        idSpace = entity.idSpace,
+        spaceId = entity.idSpace,
         name = entity.name,
         systemPrompt = entity.systemPrompt,
-        lastOpen = entity.lastOpen
+        lastOpen = Instant.fromEpochSeconds(entity.lastOpen).toLocalDateTime(TimeZone.UTC)
     )
 
     fun toEntity(domain: Chat): ChatEntity = ChatEntity(
         id = domain.id,
-        idSpace = domain.idSpace,
+        idSpace = domain.spaceId,
         name = domain.name,
         systemPrompt = domain.systemPrompt,
-        lastOpen = domain.lastOpen
+        lastOpen = domain.lastOpen.toInstant(TimeZone.UTC).epochSeconds
     )
 
     fun toChatAndMessages(entity: ChatEntity, messages: List<MessageEntity>): ChatAndMessages =

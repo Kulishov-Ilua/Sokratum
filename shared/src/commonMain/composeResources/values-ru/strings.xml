@@ -39,4 +39,13 @@
     <string name="the_model_is_not_responding">Модель не отвечает</string>
     <string name="check_details">Проверьте указанные данные\nи доступ к ресурсу</string>
     <string name="specify_model_parametr">Укажите параметры модели</string>
+    <string name="space">Пространство</string>
+    <string name="spaces">Пространства</string>
+    <string name="yesterday">Вчера</string>
+    <string name="search">Поиск</string>
+    <string name="recent_chats">Недавние чаты</string>
+    <string name="quick_chat">Быстрый чат</string>
+    <string name="back">Назад</string>
+    <string name="settings">Настройки</string>
+    <string name="connected_devices">Подключенные устройства:</string>
 </resources>

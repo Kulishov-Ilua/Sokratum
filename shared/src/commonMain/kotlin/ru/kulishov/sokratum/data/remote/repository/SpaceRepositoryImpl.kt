@@ -80,6 +80,7 @@ class SpaceRepositoryImpl(
             }
         }
         catch (e: Exception){
+            e.printStackTrace()
             emit(RefreshResult.Error)
         }
     }

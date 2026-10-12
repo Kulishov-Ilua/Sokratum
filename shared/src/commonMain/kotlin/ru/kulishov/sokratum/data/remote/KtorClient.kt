@@ -6,12 +6,15 @@ object KtorClient {
     val client: HttpClient = getKtorClient()
 
     var JWT_KEY = ""
-    val BASE_URL = "http://localhost:3000"
+    var username = ""
+    val BASE_URL = "http://10.0.2.2:3000"
 
     fun unAuth() {
         JWT_KEY = ""
+        username=""
     }
 
 }
 
 expect fun getKtorClient(): HttpClient
+

@@ -8,6 +8,9 @@ sealed class NavigationRoutes{
 
     @Serializable
     object HomeScreen: NavigationRoutes()
+
+    @Serializable
+    object SettingScreen: NavigationRoutes()
 }
 
 
