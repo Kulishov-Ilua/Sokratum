@@ -175,6 +175,27 @@ class ChatRepositoryImpl(
         return ret
     }
 
+    override suspend fun getChatById(chatId: Long): Chat? {
+        var ret: Chat? = null
+        try {
+            val response = client.get("${BASE_URL}/getChat/$chatId") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+                }
+            }
+            if (response.status == HttpStatusCode.OK) {
+                ret = response.body()
+            }
+        } catch (e: ClientRequestException) {
+            println("HTTP error: ${e.response.status}")
+            val errorBody = e.response.bodyAsText()
+            println("Error body: $errorBody")
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+        }
+        return ret
+    }
+
     override suspend fun addMessage(message: Message): Message? {
         TODO("Not yet implemented")
     }

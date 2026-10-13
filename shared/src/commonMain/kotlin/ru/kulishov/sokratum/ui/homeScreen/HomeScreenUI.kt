@@ -40,6 +40,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import ru.kulishov.sokratum.domain.model.Space
 import ru.kulishov.sokratum.ui.DeviceData
 import ru.kulishov.sokratum.ui.elements.ChatCardUI
 import ru.kulishov.sokratum.ui.elements.SpaceCardUI
@@ -103,7 +104,6 @@ fun HomeScreenUI(
             is HomeScreenViewModel.HomeScreenUiState.Success -> {
                 Column() {
                     Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(15.dp),
                         modifier = Modifier.weight(1f)
                     ) {
@@ -189,7 +189,14 @@ fun HomeScreenUI(
                                 )
                                 Icon(painterResource(Res.drawable.add), contentDescription = "Add",
                                     modifier = Modifier.clickable{
-                                        onNavigate(HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor(-1))
+                                        onNavigate(HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor(
+                                            Space
+                                                (
+                                                id = -1,
+                                                name = "",
+                                                lastOpen = Clock.System.now().toLocalDateTime(
+                                                    TimeZone.UTC)
+                                            )))
                                     })
                             }
                             LazyColumn(
@@ -198,8 +205,8 @@ fun HomeScreenUI(
                                 items( (uiState.value as HomeScreenViewModel.HomeScreenUiState.Success).spaces){space ->
                                     SpaceCardUI(
                                         space.name,
-                                        onRedact = {onNavigate(HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor(space.id))},
-                                        onClick = {onNavigate(HomeScreenViewModel.HomeScreenNavigationRoutes.Space(space.id))}
+                                        onRedact = {onNavigate(HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor(space))},
+                                        onClick = {onNavigate(HomeScreenViewModel.HomeScreenNavigationRoutes.Space(space.id, space.name))}
                                     )
                                 }
                             }

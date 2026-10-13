@@ -13,6 +13,7 @@ interface ChatRepository {
     suspend fun updateChat(chat: Chat): Chat?
     suspend fun deleteChat(chat: Chat)
     suspend fun getChat(chatId: Long): ChatAndMessages?
+    suspend fun getChatById(chatId: Long): Chat?
     suspend fun addMessage(message: Message): Message?
     suspend fun updateMessages(chatId: Long, updateTime: Long): List<Message>
 }

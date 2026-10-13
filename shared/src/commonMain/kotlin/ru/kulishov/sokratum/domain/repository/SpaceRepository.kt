@@ -8,7 +8,7 @@ import ru.kulishov.sokratum.domain.model.SpaceAndChats
 
 interface SpaceRepository {
     fun getSpacesData(): Flow<RefreshResult<Space>>
-    suspend fun getSpaceAndChats(spaceId: Long): SpaceAndChats?
+     fun getSpaceAndChats(spaceId: Long): Flow<RefreshResult<SpaceAndChats>>
     suspend fun addSpace(space: Space): Space?
     suspend fun updateSpace(space: Space): Space?
     suspend fun deleteSpace(space: Space)

@@ -33,6 +33,15 @@ fun Application.configureChatRoutings(
             get("/getAllChats") {
                 call.respond(HttpStatusCode.OK, chatDao.getAllChats())
             }
+            get("/getChat/{chatId}") {
+                val chatId = call.parameters["chatId"]?.toIntOrNull()
+                if (chatId != null) {
+                    val chat = chatDao.getChat(chatId)
+                    if (chat != null) call.respond(HttpStatusCode.OK, chat)
+                    else call.respond(HttpStatusCode.NotFound)
+                } else call.respond(HttpStatusCode.BadRequest)
+            }
+
 
             get("/getChatAndMessages/{chatId}") {
                 val chatId = call.parameters["chatId"]?.toIntOrNull()

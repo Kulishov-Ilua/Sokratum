@@ -47,5 +47,19 @@ For cloud services, the key is issued when you register on the provider's websit
     <string name="back">Back</string>
     <string name="settings">Settings</string>
     <string name="connected_devices">Connected devices:</string>
+    <string name="creation_of_space">Creation of space</string>
+    <string name="redaction_of_space">Redaction of space</string>
+    <string name="space_name">Space name</string>
+    <string name="save">Save</string>
+    <string name="create">Create</string>
+    <string name="chats">Chats</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="delete_assert">It will not be possible to undo the deletion</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="creation_of_chat">Creation of chat</string>
+    <string name="redaction_of_chat">Redaction of chat</string>
+    <string name="chat_name">Chat name</string>
+    <string name="system_prompt">System prompt</string>
 </resources>
 

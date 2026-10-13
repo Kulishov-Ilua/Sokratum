@@ -20,7 +20,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.io.IOException
+import ru.kulishov.sokratum.data.local.dao.ChatDao
 import ru.kulishov.sokratum.data.local.dao.SpaceDao
+import ru.kulishov.sokratum.data.local.data.mapper.ChatMapper
 import ru.kulishov.sokratum.data.local.data.mapper.SpaceMapper
 import ru.kulishov.sokratum.data.remote.KtorClient.BASE_URL
 import ru.kulishov.sokratum.data.remote.KtorClient.JWT_KEY
@@ -31,9 +33,11 @@ import ru.kulishov.sokratum.domain.model.Space
 import ru.kulishov.sokratum.domain.model.SpaceAndChats
 import ru.kulishov.sokratum.domain.model.SpaceWithoutStorage
 import ru.kulishov.sokratum.domain.repository.SpaceRepository
+import kotlin.collections.map
 
 class SpaceRepositoryImpl(
-    private val spaceDao: SpaceDao
+    private val spaceDao: SpaceDao,
+    private val chatDao: ChatDao
 ): SpaceRepository {
     override  fun getSpacesData():Flow<RefreshResult<Space>> = flow {
         val cached = spaceDao.getSpaces()
@@ -86,25 +90,54 @@ class SpaceRepositoryImpl(
     }
 
 
-    override suspend fun getSpaceAndChats(spaceId: Long): SpaceAndChats? {
-        var ret: SpaceAndChats? = null
+    override fun getSpaceAndChats(spaceId: Long): Flow<RefreshResult<SpaceAndChats>> = flow {
+        val cached = spaceDao.getSpaceAndChats(spaceId)
+        if (cached!=null) {
+            emit(RefreshResult.Cached(listOf(cached)))
+        }
         try {
+
             val response = client.get("${BASE_URL}/getSpaceAndChats/$spaceId") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
                 }
             }
-            if (response.status == HttpStatusCode.OK) {
-                ret = response.body()
-            }
-        }catch (e: ClientRequestException) {
-            println("HTTP error: ${e.response.status}")
-            val errorBody = e.response.bodyAsText()
-            println("Error body: $errorBody")
-        } catch (e: Exception) {
-            println("Error: ${e.message}")
+            val body: SpaceAndChats = response.body()
+            chatDao.replaceAll(body.chats.map { ChatMapper.toEntity(it) })
+            emit(RefreshResult.Fresh(listOf(body)))
+        }catch (e: CancellationException){
+            throw e
         }
-        return ret
+        catch (e: IOException){
+            if(cached!=null){
+                emit(RefreshResult.Offline(listOf(cached), RefreshError.Network))
+            }else{
+                emit(RefreshResult.Error)
+            }
+        }
+        catch (e: ClientRequestException){
+            val error = if (e.response.status == HttpStatusCode.Unauthorized) {
+                RefreshError.Unauthorized
+            } else {
+                RefreshError.Server(e.response.status.value)
+            }
+            if(cached!=null){
+                emit(RefreshResult.Offline(listOf(cached), error))
+            }else{
+                emit(RefreshResult.Error)
+            }
+        }
+        catch (e: ServerResponseException){
+            if(cached!=null){
+                emit(RefreshResult.Offline(listOf(cached), RefreshError.Server(e.response.status.value)))
+            }else{
+                emit(RefreshResult.Error)
+            }
+        }
+        catch (e: Exception){
+            e.printStackTrace()
+            emit(RefreshResult.Error)
+        }
     }
 
     override suspend fun addSpace(space: Space): Space? {

@@ -48,4 +48,18 @@
     <string name="back">Назад</string>
     <string name="settings">Настройки</string>
     <string name="connected_devices">Подключенные устройства:</string>
+    <string name="creation_of_space">Создание пространства</string>
+    <string name="redaction_of_space">Редактирование пространства</string>
+    <string name="space_name">Имя пространства</string>
+    <string name="save">Сохранить</string>
+    <string name="create">Создать</string>
+    <string name="chats">Чаты</string>
+    <string name="are_you_sure">Вы уверены?</string>
+    <string name="delete_assert">Отменить удаление будет невозможно</string>
+    <string name="delete">Удалить</string>
+    <string name="cancel">Отменить</string>
+    <string name="creation_of_chat">Создание чата</string>
+    <string name="redaction_of_chat">Редактирование чатаt</string>
+    <string name="chat_name">Название name</string>
+    <string name="system_prompt">Системный промпт</string>
 </resources>
