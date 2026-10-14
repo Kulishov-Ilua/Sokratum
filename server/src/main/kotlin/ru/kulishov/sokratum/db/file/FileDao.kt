@@ -3,6 +3,7 @@ package ru.kulishov.sokratum.db.file
 import kotlinx.datetime.toKotlinLocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import ru.kulishov.sokratum.db.query
@@ -42,10 +43,10 @@ class FileDao {
     }
 
     suspend fun getSpaceFiles(spaceId: Int): List<File> = query {
-        return@query Files.selectAll().where { Files.spaceId eq spaceId }.map { rowToFile(it) }
+        Files.selectAll().where { Files.spaceId eq spaceId }.map { rowToFile(it) }
     }
 
-    suspend fun deleteFile(id: Int) {
-
+    suspend fun deleteFile(id: Uuid): Boolean = query {
+        Files.deleteWhere { Files.id eq id } > 0
     }
 }

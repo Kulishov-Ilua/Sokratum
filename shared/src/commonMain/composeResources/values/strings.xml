@@ -61,5 +61,7 @@ For cloud services, the key is issued when you register on the provider's websit
     <string name="redaction_of_chat">Redaction of chat</string>
     <string name="chat_name">Chat name</string>
     <string name="system_prompt">System prompt</string>
+    <string name="files">Files:</string>
+    <string name="uploaded">Uploaded</string>
 </resources>
 

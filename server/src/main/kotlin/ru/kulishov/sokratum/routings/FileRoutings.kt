@@ -29,37 +29,6 @@ fun Application.configureFileRoutings(
                 } else call.respond(HttpStatusCode.BadRequest)
             }
 
-            post("/addFile/{spaceId}") {
-                val spaceId = call.parameters["spaceId"]?.toIntOrNull()
-                if (spaceId != null) {
-                    var saved: File? = null
-
-                    call.receiveMultipart().forEachPart { part ->
-                        if (part is PartData.FileItem) {
-                            val id = Uuid.random()
-                            val originalName = part.originalFileName ?: "unnamed"
-                            val contentType =
-                                part.contentType?.toString() ?: "application/octet-stream"
-
-                            val size = FileStorrage.save(id, part.provider())
-
-                            saved = fileDao.addFile(
-                                id = id,
-                                spaceId= spaceId,
-                                name = originalName,
-                                size = size,
-                                contentType = contentType,
-                                path = FileStorrage.fileOf(id).absolutePath
-                            )
-                        }
-                        part.dispose()
-                    }
-
-                    val doc =
-                        saved ?: return@post call.respond(HttpStatusCode.BadRequest, "no file")
-                    call.respond(HttpStatusCode.Created, doc)
-                } else call.respond(HttpStatusCode.BadRequest)
-            }
         }
     }
 }

@@ -3,15 +3,19 @@ package ru.kulishov.sokratum.data.remote.repository
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.util.logging.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +31,10 @@ import ru.kulishov.sokratum.data.local.data.mapper.SpaceMapper
 import ru.kulishov.sokratum.data.remote.KtorClient.BASE_URL
 import ru.kulishov.sokratum.data.remote.KtorClient.JWT_KEY
 import ru.kulishov.sokratum.data.remote.KtorClient.client
+import ru.kulishov.sokratum.data.remote.model.chats.SendMessageRequest
+import ru.kulishov.sokratum.data.remote.model.space.SelectedFile
+import ru.kulishov.sokratum.data.remote.model.space.SpaceAndFiles
+import ru.kulishov.sokratum.domain.model.Message
 import ru.kulishov.sokratum.domain.model.RefreshError
 import ru.kulishov.sokratum.domain.model.RefreshResult
 import ru.kulishov.sokratum.domain.model.Space
@@ -138,6 +146,95 @@ class SpaceRepositoryImpl(
             e.printStackTrace()
             emit(RefreshResult.Error)
         }
+    }
+
+    override suspend fun getSpaceAndFiles(spaceId: Long): SpaceAndFiles? {
+        var ret: SpaceAndFiles? = null
+        try {
+            val response = client.get("${BASE_URL}/getSpaceAndFiles/$spaceId") {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+                }
+            }
+            if (response.status == HttpStatusCode.OK) {
+                ret = response.body()
+            }
+        }catch (e: ClientRequestException) {
+            println("HTTP error: ${e.response.status}")
+            val errorBody = e.response.bodyAsText()
+            println("Error body: $errorBody")
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+        }
+        return ret
+    }
+
+    override suspend fun deleteFile(
+        spaceId: Long,
+        fileId: String
+    ): SpaceAndFiles? {
+        var ret: SpaceAndFiles? = null
+        try {
+            val response = client.post("${BASE_URL}/deleteFile/$spaceId/$fileId") {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+                }
+            }
+            if (response.status == HttpStatusCode.OK) {
+                ret = response.body()
+            }
+        }catch (e: ClientRequestException) {
+            println("HTTP error: ${e.response.status}")
+            val errorBody = e.response.bodyAsText()
+            println("Error body: $errorBody")
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+        }
+        return ret
+    }
+
+    override suspend fun addFile(
+        spaceId: Int,
+        file: SelectedFile
+    ): SpaceAndFiles? {
+        var ret: SpaceAndFiles? = null
+        try {
+            val response = client.post("${BASE_URL}/addFile/$spaceId") {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+                }
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append(
+                                key = "file",
+                                value = file.bytes,
+                                headers = Headers.build {
+                                    append(HttpHeaders.ContentType, file.type)
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=\"${file.name}\""
+                                    )
+                                }
+                            )
+                        }
+                    )
+                )
+            }
+            if (response.status == HttpStatusCode.OK) {
+                ret = response.body()
+            }
+        }catch (e: ClientRequestException) {
+            println("HTTP error: ${e.response.status}")
+            val errorBody = e.response.bodyAsText()
+            println("Error body: $errorBody")
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+        }
+        return ret
     }
 
     override suspend fun addSpace(space: Space): Space? {

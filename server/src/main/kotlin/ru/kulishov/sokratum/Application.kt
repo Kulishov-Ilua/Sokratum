@@ -60,7 +60,7 @@ fun Application.module() {
     configureSecurity(environment)
     configureAuthRouting(userDao)
     configureChatRoutings(chatDao, messageDao)
-    configureSpaceRouting(spaceDao)
+    configureSpaceRouting(spaceDao,fileDao)
     configureFileRoutings(fileDao)
 
 

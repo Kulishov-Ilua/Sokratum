@@ -16,9 +16,12 @@ import ru.kulishov.sokratum.domain.usecase.chat.DeleteChatUseCase
 import ru.kulishov.sokratum.domain.usecase.chat.GetChatByIdUseCase
 import ru.kulishov.sokratum.domain.usecase.chat.GetLastChatsUseCase
 import ru.kulishov.sokratum.domain.usecase.chat.UpdateChatUseCase
+import ru.kulishov.sokratum.domain.usecase.space.AddFileUseCase
 import ru.kulishov.sokratum.domain.usecase.space.AddSpaceUseCase
+import ru.kulishov.sokratum.domain.usecase.space.DeleteFileUseCase
 import ru.kulishov.sokratum.domain.usecase.space.DeleteSpaceUseCase
 import ru.kulishov.sokratum.domain.usecase.space.GetSpaceAndChatsUseCase
+import ru.kulishov.sokratum.domain.usecase.space.GetSpacesAndFilesUseCase
 import ru.kulishov.sokratum.domain.usecase.space.GetSpacesDataUseCase
 import ru.kulishov.sokratum.domain.usecase.space.UpdateSpaceUseCase
 
@@ -42,4 +45,7 @@ val domainModlule = module {
     factory { AddChatUseCase(get()) }
     factory { UpdateChatUseCase(get()) }
     factory { GetChatByIdUseCase(get()) }
+    factory { GetSpacesAndFilesUseCase(get()) }
+    factory { AddFileUseCase(get()) }
+    factory { DeleteFileUseCase(get()) }
 }

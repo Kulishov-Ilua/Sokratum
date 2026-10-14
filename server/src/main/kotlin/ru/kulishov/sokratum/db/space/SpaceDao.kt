@@ -31,6 +31,9 @@ class SpaceDao {
     suspend fun getSpaces(): List<Space> =
         query { Spaces.selectAll().orderBy(Spaces.lastOpen, SortOrder.DESC).map { rowToSpace(it) } }
 
+    suspend fun getSpaceById(id: Int): Space? =
+        query { Spaces.selectAll().where{ Spaces.id eq id}.map { rowToSpace(it) }.singleOrNull() }
+
     suspend fun getSpaceAndChats(spaceId: Int): SpaceAndChats? = query {
         val space =
             Spaces.selectAll().where { Spaces.id eq spaceId }.map { rowToSpace(it) }.firstOrNull()

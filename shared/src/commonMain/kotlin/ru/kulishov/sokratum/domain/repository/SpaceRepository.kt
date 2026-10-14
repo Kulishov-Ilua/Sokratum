@@ -1,6 +1,8 @@
 package ru.kulishov.sokratum.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import ru.kulishov.sokratum.data.remote.model.space.SelectedFile
+import ru.kulishov.sokratum.data.remote.model.space.SpaceAndFiles
 import ru.kulishov.sokratum.domain.model.RefreshResult
 import ru.kulishov.sokratum.domain.model.SpaceWithoutStorage
 import ru.kulishov.sokratum.domain.model.Space
@@ -9,6 +11,13 @@ import ru.kulishov.sokratum.domain.model.SpaceAndChats
 interface SpaceRepository {
     fun getSpacesData(): Flow<RefreshResult<Space>>
      fun getSpaceAndChats(spaceId: Long): Flow<RefreshResult<SpaceAndChats>>
+
+    suspend fun getSpaceAndFiles(spaceId:Long): SpaceAndFiles?
+
+    suspend fun deleteFile(spaceId:Long, fileId: String): SpaceAndFiles?
+
+    suspend fun addFile(spaceId:Int, file: SelectedFile): SpaceAndFiles?
+
     suspend fun addSpace(space: Space): Space?
     suspend fun updateSpace(space: Space): Space?
     suspend fun deleteSpace(space: Space)

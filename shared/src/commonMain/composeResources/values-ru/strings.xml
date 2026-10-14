@@ -62,4 +62,6 @@
     <string name="redaction_of_chat">Редактирование чатаt</string>
     <string name="chat_name">Название name</string>
     <string name="system_prompt">Системный промпт</string>
+    <string name="files">Файлы:</string>
+    <string name="uploaded">Загружен</string>
 </resources>
