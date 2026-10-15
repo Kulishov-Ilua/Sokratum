@@ -9,6 +9,6 @@ data class ChatAndMessages(
     val spaceId: Int,
     val name: String,
     val systemPrompt: String,
-    val lastOpen: LocalDateTime,
+    val lastOpen: Long,
     val messages: MessagesAndUpdateTime
 )

@@ -53,13 +53,13 @@ class ChatDao {
             }
             Chats.update({ Chats.id eq chat.id }) { it[Chats.lastOpen] = LocalDateTime.now() }
             val messages =
-                Messages.selectAll().where { Messages.idChat eq chat.id }.map { rowToMessage(it) }
+                Messages.selectAll().where { Messages.idChat eq chat.id }.orderBy(Messages.id).map { rowToMessage(it) }
             return@query ChatAndMessages(
                 id = chat.id,
                 spaceId = chat.spaceId,
                 name = chat.name,
                 systemPrompt = chat.systemPrompt,
-                lastOpen = chat.lastOpen,
+                lastOpen = messages.lastOrNull()?.id ?:-1,
                 messages = MessagesAndUpdateTime(
                     messages,
                     LocalDateTime.now().toKotlinLocalDateTime()

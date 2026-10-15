@@ -16,4 +16,8 @@ interface ChatRepository {
     suspend fun getChatById(chatId: Long): Chat?
     suspend fun addMessage(message: Message): Message?
     suspend fun updateMessages(chatId: Long, updateTime: Long): List<Message>
+
+    fun messages(chatId: Int, afterMessageId: Long?, outgoing: Flow<Message>): Flow<RefreshResult<Message>>
+    suspend fun send(message: Message)
+
 }

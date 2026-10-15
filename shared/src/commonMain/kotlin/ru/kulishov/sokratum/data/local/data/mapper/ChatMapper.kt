@@ -36,7 +36,7 @@ object ChatMapper {
             spaceId = entity.idSpace.toInt(),
             name = entity.name,
             systemPrompt = entity.systemPrompt,
-            lastOpen = LocalDateTime(0,0,0,0,0)
+            lastOpen =messages.lastOrNull()?.id?: -1
         ,
             MessagesAndUpdateTime(
                 messages = messages.map {

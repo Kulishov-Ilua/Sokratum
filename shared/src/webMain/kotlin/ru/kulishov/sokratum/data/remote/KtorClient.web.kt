@@ -3,6 +3,7 @@ package ru.kulishov.sokratum.data.remote
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
@@ -19,4 +20,8 @@ actual fun getKtorClient(): HttpClient = HttpClient(){
             ignoreUnknownKeys = true
         })
     }
+    install(WebSockets) {
+        pingIntervalMillis = 20_000
+    }
+
 }

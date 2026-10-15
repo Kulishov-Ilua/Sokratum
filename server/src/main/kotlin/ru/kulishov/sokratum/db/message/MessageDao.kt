@@ -34,13 +34,11 @@ class MessageDao {
 
     suspend fun updateMessageList(
         chatId: Int,
-        lastOpen: kotlinx.datetime.LocalDateTime
+        lastMessage: Long
     ): MessagesAndUpdateTime = query {
         val messages = Messages.selectAll()
-            .where { (Messages.idChat eq chatId) and (Messages.sendTime greater lastOpen.toJavaLocalDateTime()) }
-            .orderBy(
-                Messages.sendTime, SortOrder.DESC
-            ).map { rowToMessage(it) }
+            .where { (Messages.idChat eq chatId) and (Messages.id greater lastMessage) }
+            .map { rowToMessage(it) }
         return@query MessagesAndUpdateTime(messages, LocalDateTime.now().toKotlinLocalDateTime())
     }
 }

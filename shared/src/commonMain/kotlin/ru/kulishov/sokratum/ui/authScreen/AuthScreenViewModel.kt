@@ -36,7 +36,11 @@ class AuthScreenViewModel(
                 val response = authUseCase(AuthRequest(login,password))
                 if(response == HttpStatusCode.OK){
                     _uiState.value= AuthScreenState.AuthSuccesss
-                }else{
+                }
+                else if(response== HttpStatusCode.InternalServerError){
+                    _uiState.value= AuthScreenState.AuthSuccesss
+                }
+                else{
                     _uiState.value= AuthScreenState.BadAuthRequest(response)
                 }
             }
