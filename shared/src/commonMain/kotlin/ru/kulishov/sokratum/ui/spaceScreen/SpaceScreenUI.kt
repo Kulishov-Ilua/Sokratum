@@ -143,7 +143,7 @@ fun SpaceScreenUI(
                                     lastOpen = chat.lastOpen,
                                     now = now,
                                     onClick = {
-                                        onNavigate(SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen(chat.id))
+                                        onNavigate(SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen(chat.id,chat.spaceId,chat.name))
                                     }
                                 )
                             }

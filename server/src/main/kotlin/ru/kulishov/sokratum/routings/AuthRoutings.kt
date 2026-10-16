@@ -8,6 +8,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import ru.kulishov.sokratum.ai.AIModels
 import ru.kulishov.sokratum.db.user.UserDao
 import ru.kulishov.sokratum.dto.AuthResponse
 import ru.kulishov.sokratum.dto.LoginRequest
@@ -81,6 +82,9 @@ fun Application.configureAuthRouting(
 
             get("/devices"){
                 call.respond(HttpStatusCode.OK, userDao.getDevicesData())
+            }
+            get("/aiModels"){
+                call.respond(HttpStatusCode.OK, AIModels.aiModels.map { it.name })
             }
         }
     }

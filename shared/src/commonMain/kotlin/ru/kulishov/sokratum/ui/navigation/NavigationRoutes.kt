@@ -22,6 +22,10 @@ sealed class NavigationRoutes{
                                  val spaceId: Long)
     @Serializable
     data class SpaceScreen(val spaceId:Long, val spaceName:String)
+
+
+    @Serializable
+    data class ChatScreen(val chatId: Long, val spaceId:Long, val chatName:String, val message:String = "")
 }
 
 

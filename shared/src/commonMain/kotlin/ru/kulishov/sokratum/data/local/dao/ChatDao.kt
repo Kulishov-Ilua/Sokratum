@@ -34,7 +34,7 @@ interface ChatDao {
     @Query("Select * from chats where id = :id")
     suspend fun getChat(id: Long): ChatEntity?
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addChat(chat: ChatEntity): Long
 
     @Update

@@ -1,6 +1,7 @@
 package ru.kulishov.sokratum.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import ru.kulishov.sokratum.data.remote.model.chats.SendMessageRequest
 import ru.kulishov.sokratum.domain.model.Chat
 import ru.kulishov.sokratum.domain.model.ChatAndMessages
 import ru.kulishov.sokratum.domain.model.Message
@@ -12,12 +13,13 @@ interface ChatRepository {
     suspend fun addChat(chat: Chat): Chat?
     suspend fun updateChat(chat: Chat): Chat?
     suspend fun deleteChat(chat: Chat)
-    suspend fun getChat(chatId: Long): ChatAndMessages?
+     fun getChat(chatId: Long, spaceId:Long, message:String?): Flow<RefreshResult<Message>>
     suspend fun getChatById(chatId: Long): Chat?
-    suspend fun addMessage(message: Message): Message?
+    suspend fun sendMessage(message: SendMessageRequest): Message?
     suspend fun updateMessages(chatId: Long, updateTime: Long): List<Message>
 
-    fun messages(chatId: Int, afterMessageId: Long?, outgoing: Flow<Message>): Flow<RefreshResult<Message>>
+    fun messages(chatId: Int,spaceId:Long, afterMessageId: Long?, outgoing: Flow<Message>): Flow<RefreshResult<Message>>
     suspend fun send(message: Message)
+
 
 }

@@ -13,6 +13,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import org.jetbrains.exposed.v1.core.exposedLogger
 import ru.kulishov.sokratum.ai.rag.FileStorrage
+import ru.kulishov.sokratum.ai.rag.RAG
 import ru.kulishov.sokratum.db.file.File
 import ru.kulishov.sokratum.db.file.FileDao
 import ru.kulishov.sokratum.db.space.Space
@@ -51,7 +52,7 @@ import kotlin.uuid.Uuid
                 val spaceId = call.parameters["spaceId"]?.toIntOrNull()
                 if (spaceId != null) {
                     var saved: File? = null
-
+                    RAG.deleteStorage(spaceId)
                     call.receiveMultipart().forEachPart { part ->
                         if (part is PartData.FileItem) {
                             val id = Uuid.random()
@@ -88,6 +89,7 @@ import kotlin.uuid.Uuid
                 if(spaceId==null||fileId==null){
                     call.respond(HttpStatusCode.BadRequest)
                 }else{
+                    RAG.deleteStorage(spaceId)
                     val ok = fileDao.deleteFile(Uuid.parse(fileId))
                     if(ok){
                         val space = spaceDao.getSpaceById(spaceId)
@@ -98,6 +100,7 @@ import kotlin.uuid.Uuid
                         call.respond(HttpStatusCode.NotFound)
                     }
                 }
+
             }
             post("/addSpace") {
                 val body = call.receive<Space>()

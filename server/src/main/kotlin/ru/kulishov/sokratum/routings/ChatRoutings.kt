@@ -1,6 +1,7 @@
 package ru.kulishov.sokratum.routings
 
 import dev.langchain4j.agentic.AgenticServices
+import dev.langchain4j.rag.query.Query
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
@@ -9,7 +10,18 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import io.ktor.server.websocket.DefaultWebSocketServerSession
+import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toKotlinLocalDateTime
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.v1.core.exposedLogger
 import ru.kulishov.sokratum.ai.AIModels
 import ru.kulishov.sokratum.ai.ExpertAgent
 import ru.kulishov.sokratum.ai.rag.RAG
@@ -19,11 +31,20 @@ import ru.kulishov.sokratum.db.message.Message
 import ru.kulishov.sokratum.db.message.MessageDao
 import ru.kulishov.sokratum.dto.chat.SendMessageRequest
 import java.time.LocalDateTime
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
 
 fun Application.configureChatRoutings(
     chatDao: ChatDao,
     messageDao: MessageDao
 ) {
+    val json = Json { ignoreUnknownKeys = true }
+    val rooms = ConcurrentHashMap<Int, MutableSet<DefaultWebSocketServerSession>>()
+    val roomMutexes = ConcurrentHashMap<Int, Mutex>()
+    fun mutexFor(chatId: Int): Mutex =
+        roomMutexes.computeIfAbsent(chatId) { Mutex() }
+
     routing {
         authenticate("auth-jwt") {
             get("/getLastChats") {
@@ -100,7 +121,13 @@ fun Application.configureChatRoutings(
                         .systemMessage(if (findChat.systemPrompt.isNotBlank()) findChat.systemPrompt else "Ответь на вопрос пользователя")
                         .contentRetriever(retriever)
                         .build()
+
+                    exposedLogger.warn("Prompt to LLM: ${body.text}")
+                    exposedLogger.warn("Retriever context: ${retriever.retrieve(Query.from(body.text))}")
                     val answer = agent.chat(body.text)
+                    exposedLogger.warn("LLM answer: $answer")
+
+                    //val answer = agent.chat(body.text)
                     if (answer != null) {
                         val message = messageDao.addMessage(
                             Message(
@@ -126,13 +153,105 @@ fun Application.configureChatRoutings(
             post("/request") {
                 val body = call.receive<String>()
                 val models = AIModels.models.values
-                if(models.isNotEmpty()&&models.first()!=null){
-                    val answer = models.first()?.chat(body)?: ""
-                    if(answer.isNotBlank()){
+                if (models.isNotEmpty() && models.first() != null) {
+                    val answer = models.first()?.chat(body) ?: ""
+                    if (answer.isNotBlank()) {
                         call.respond(HttpStatusCode.OK, answer)
-                    }else call.respond(HttpStatusCode.InternalServerError)
-                }else call.respond(HttpStatusCode.NotFound)
+                    } else call.respond(HttpStatusCode.InternalServerError)
+                } else call.respond(HttpStatusCode.NotFound)
             }
+
+            webSocket("/messages/{chatId}/{cursor}") {
+                var chatId = call.parameters["chatId"]?.toIntOrNull()
+                val cursor = call.parameters["cursor"]?.toLongOrNull()
+
+                if (chatId != null && cursor != null) {
+                    val missed = messageDao.updateMessageList(chatId, cursor)
+                    missed.messages.forEach { send(Frame.Text(json.encodeToString(it))) }
+
+                    val room = rooms.computeIfAbsent(chatId) { ConcurrentHashMap.newKeySet() }
+                    val mutex = mutexFor(chatId)
+                    try {
+                        for (frame in incoming) {
+                            when (frame) {
+                                is Frame.Text -> {
+                                    val message = json.decodeFromString<SendMessageRequest>(frame.readText())
+
+                                    if (message.chatId != chatId) continue
+
+                                    val saved = messageDao.addMessage(Message(
+                                        id = -1,
+                                        idChat = message.chatId,
+                                        isModel = false,
+                                        text = message.text,
+                                        sendTime = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                                    ))
+
+                                    val broadcast = Frame.Text(json.encodeToString(saved))
+                                    val recipients = mutex.withLock { room.toList() }
+                                    recipients.forEach { session ->
+                                        runCatching { session.send(broadcast) }
+                                    }
+
+                                    val findModel = AIModels.models[message.model]
+                                    val findChat = chatDao.getChat(chatId)
+                                    if (findModel != null && findChat != null) {
+                                        val retriever = RAG.getRetriever(findChat.spaceId)
+
+                                        var agent = AgenticServices
+                                            .agentBuilder(ExpertAgent::class.java)
+                                            .chatModel(findModel)
+                                            .outputKey("response")
+                                            .systemMessage(if (findChat.systemPrompt.isNotBlank()) findChat.systemPrompt else "Ответь на вопрос пользователя")
+                                            .contentRetriever(retriever)
+                                            .build()
+                                        val answer = agent.chat(message.text)
+                                        if (answer != null) {
+                                            val modelMessage = messageDao.addMessage(
+                                                Message(
+                                                    id = -1,
+                                                    idChat = chatId,
+                                                    isModel = true,
+                                                    text = answer,
+                                                    sendTime = LocalDateTime.now()
+                                                        .toKotlinLocalDateTime()
+                                                )
+                                            )
+                                            if (modelMessage != null) {
+                                                val newMessage = messageDao.addMessage(modelMessage)
+                                                if(newMessage!=null){
+                                                    val aiFrame = Frame.Text(json.encodeToString(newMessage))
+                                                    recipients.forEach { session ->
+                                                        runCatching { session.send(aiFrame) }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+
+                                }
+
+                                is Frame.Close -> break
+                                else -> {}
+                            }
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+                        synchronized(room) {
+                            room.remove(this)
+                            if (room.isEmpty()) rooms.remove(chatId)
+                        }
+                    }
+                } else {
+                    cancel("Invalid chatId or cursor")
+                    return@webSocket
+                }
+            }
+
         }
     }
 }

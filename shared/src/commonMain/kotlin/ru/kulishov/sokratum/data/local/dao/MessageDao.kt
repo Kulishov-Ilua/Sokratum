@@ -15,7 +15,7 @@ interface MessageDao {
     @Query("select * from messages where idChat = :chatId order by sendTime")
     suspend fun getChatMessages(chatId: Long): List<MessageEntity>
 
-    @Query("SELECT * FROM messages WHERE chatId = :chatId ORDER BY id ASC")
+    @Query("SELECT * FROM messages WHERE idChat = :chatId ORDER BY id ASC")
     suspend fun getMessages(chatId: Long): List<MessageEntity>
 
 //    @Query("SELECT * FROM messages WHERE idChat = :chatId AND sendTime > :updateTime ORDER BY sendTime")
@@ -25,7 +25,7 @@ interface MessageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addMessage(message: MessageEntity): Long
 
-    @Query("DELETE FROM messages WHERE chatId = :chatId")
+    @Query("DELETE FROM messages WHERE idChat = :chatId")
     suspend fun deleteByChat(chatId: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

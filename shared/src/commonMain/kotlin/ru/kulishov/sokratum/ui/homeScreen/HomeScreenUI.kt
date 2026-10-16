@@ -171,7 +171,7 @@ fun HomeScreenUI(
                                     findSpace?.name,
                                     chat.lastOpen,
                                     nowTime.toLocalDateTime(TimeZone.UTC),
-                                    {onNavigate(HomeScreenViewModel.HomeScreenNavigationRoutes.Chat(chat.id))}
+                                    {onNavigate(HomeScreenViewModel.HomeScreenNavigationRoutes.Chat(chat.id,chat.spaceId,chat.name))}
                                 )
                             }
                         }
@@ -225,7 +225,9 @@ fun HomeScreenUI(
                                     leadingIcon = null,
                                     trailingIcon = {
                                         if (textFieldState.text.isNotEmpty()) {
-                                            IconButton(onClick = {  }) {
+                                            IconButton(onClick = {
+                                                onNavigate(HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat(textFieldState.text.toString()))
+                                            }) {
                                                 Icon(
                                                     painter = painterResource(Res.drawable.keyboard_arrow_right),
                                                     contentDescription = "send"

@@ -32,6 +32,8 @@ dependencies {
     implementation("io.ktor:ktor-server-cors:${ktor}")
 
     implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.server.websocket)
+
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.sessions)
     implementation(libs.ktor.server.auth)
@@ -46,6 +48,7 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.java.time)
     implementation(libs.exposed.crypt)
+    implementation(libs.ktor.serialization.json)
 
 
 

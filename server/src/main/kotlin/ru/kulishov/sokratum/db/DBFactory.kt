@@ -3,9 +3,12 @@ package ru.kulishov.sokratum.db
 import io.ktor.server.application.ApplicationEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.insertIgnore
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import ru.kulishov.sokratum.db.chat.ChatDao
 import ru.kulishov.sokratum.db.chat.Chats
@@ -17,6 +20,8 @@ import ru.kulishov.sokratum.db.space.SpaceDao
 import ru.kulishov.sokratum.db.space.Spaces
 import ru.kulishov.sokratum.db.user.UserDao
 import ru.kulishov.sokratum.db.user.Users
+import java.time.LocalDateTime
+import kotlin.time.Clock
 
 lateinit var keyCrypt: String
 lateinit var salt: String
@@ -45,12 +50,11 @@ object DBFactory {
             SchemaUtils.create(Spaces)
             SchemaUtils.create(Messages)
             SchemaUtils.create(Files)
-
-//            Spaces.insert {
-//                it[Spaces.id] = 0
-//                it[Spaces.name]=""
-//            }
-
+            Spaces.insertIgnore {
+                it[id]=0
+                it[name]="Main"
+                it[lastOpen]= LocalDateTime.now()
+            }
         }
     }
 

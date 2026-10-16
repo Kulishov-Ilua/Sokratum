@@ -39,6 +39,7 @@ import sokratum.shared.generated.resources.Res
 import sokratum.shared.generated.resources.are_you_sure
 import sokratum.shared.generated.resources.back
 import sokratum.shared.generated.resources.cancel
+import sokratum.shared.generated.resources.chat_name
 import sokratum.shared.generated.resources.create
 import sokratum.shared.generated.resources.creation_of_chat
 import sokratum.shared.generated.resources.creation_of_space
@@ -131,7 +132,7 @@ fun RedactChatScreenUI(
                         TextFieldCustom(
                             value = viewModel.name,
                             onValueChange = {viewModel.name=it},
-                            label = {Text(stringResource(Res.string.space_name), style = MaterialTheme.typography.bodySmall)}
+                            label = {Text(stringResource(Res.string.chat_name), style = MaterialTheme.typography.bodySmall)}
                         )
                         TextFieldCustom(
                             value = viewModel.systemPrompt,

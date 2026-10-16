@@ -47,7 +47,7 @@ class SpaceScreenViewModel(
     sealed class SpaceScreenNavigationRoutes{
         object Back: SpaceScreenNavigationRoutes()
         data class SpaceRedact(val id:Long, val name: String): SpaceScreenNavigationRoutes()
-        data class ChatScreen(val chatId:Long): SpaceScreenNavigationRoutes()
+        data class ChatScreen(val chatID: Long, val spaceId:Long, val chatName:String): SpaceScreenNavigationRoutes()
         data class ChatWithMessageSend(val message:String, val spaceId:Long): SpaceScreenNavigationRoutes()
         data class ChatRedact(val chatId: Long, val chatName: String, val spaceId: Long): SpaceScreenNavigationRoutes()
     }

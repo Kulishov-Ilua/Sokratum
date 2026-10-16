@@ -30,26 +30,26 @@ object ChatMapper {
         lastOpen = domain.lastOpen.toInstant(TimeZone.UTC).epochSeconds
     )
 
-    fun toChatAndMessages(entity: ChatEntity, messages: List<MessageEntity>): ChatAndMessages =
-        ChatAndMessages(
-            id = entity.id.toInt(),
-            spaceId = entity.idSpace.toInt(),
-            name = entity.name,
-            systemPrompt = entity.systemPrompt,
-            lastOpen =messages.lastOrNull()?.id?: -1
-        ,
-            MessagesAndUpdateTime(
-                messages = messages.map {
-                    Message(
-                        id = it.id,
-                        idChat = it.idChat,
-                        isModel = it.isModel,
-                        text = it.text,
-                        sendTime = it.sendTime
-                    )
-                },
-                updateTime = Clock.System.now().toLocalDateTime(timeZone = TimeZone.UTC)
-            )
-
-        )
+//    fun toChatAndMessages(entity: ChatEntity, messages: List<MessageEntity>): ChatAndMessages =
+//        ChatAndMessages(
+//            id = entity.id.toInt(),
+//            spaceId = entity.idSpace.toInt(),
+//            name = entity.name,
+//            systemPrompt = entity.systemPrompt,
+//            lastOpen =messages.lastOrNull()?.id?: -1
+//        ,
+//            MessagesAndUpdateTime(
+//                messages = messages.map {
+//                    Message(
+//                        id = it.id,
+//                        idChat = it.idChat,
+//                        isModel = it.isModel,
+//                        text = it.text,
+//                        sendTime = it.sendTime
+//                    )
+//                },
+//                updateTime = Clock.System.now().toLocalDateTime(timeZone = TimeZone.UTC)
+//            )
+//
+//        )
 }

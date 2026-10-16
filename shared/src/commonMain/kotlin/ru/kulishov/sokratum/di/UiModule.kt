@@ -3,6 +3,7 @@ package ru.kulishov.sokratum.di
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import ru.kulishov.sokratum.ui.authScreen.AuthScreenViewModel
+import ru.kulishov.sokratum.ui.chatScreen.ChatScreenViewModel
 import ru.kulishov.sokratum.ui.homeScreen.HomeScreenViewModel
 import ru.kulishov.sokratum.ui.redactChatScreen.RedactChatScreenViewModel
 import ru.kulishov.sokratum.ui.redactSpaceScreen.RedactSpaceScreenViewModel
@@ -17,4 +18,5 @@ val uiModule = module {
     viewModelOf(::RedactSpaceScreenViewModel)
     viewModelOf(::SpaceScreenViewModel)
     viewModelOf(::RedactChatScreenViewModel)
+    viewModelOf(::ChatScreenViewModel)
 }

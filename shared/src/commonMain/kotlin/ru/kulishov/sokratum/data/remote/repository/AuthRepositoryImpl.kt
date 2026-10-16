@@ -139,4 +139,25 @@ class AuthRepositoryImpl() : AuthRepository {
         }
         return ret
     }
+
+    override suspend fun getModels(): List<String> {
+        var ret = emptyList<String>()
+        try {
+            val response = client.get("${BASE_URL}/getModels"){
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+                }
+            }
+            if (response.status == HttpStatusCode.OK) {
+                ret = response.body()
+            }
+        }catch (e: ClientRequestException) {
+            println("HTTP error: ${e.response.status}")
+            val errorBody = e.response.bodyAsText()
+            println("Error body: $errorBody")
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+        }
+        return ret
+    }
 }

@@ -5,12 +5,16 @@ import io.ktor.server.plugins.cors.routing.CORS
 import kotlinx.serialization.json.Json
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import io.ktor.server.websocket.*
+import io.ktor.server.websocket.pingPeriod
+import io.ktor.server.websocket.timeout
 import ru.kulishov.sokratum.ai.AIModels
 import ru.kulishov.sokratum.ai.rag.FileStorrage
 import ru.kulishov.sokratum.db.DBFactory
@@ -25,6 +29,7 @@ import ru.kulishov.sokratum.routings.configureAuthRouting
 import ru.kulishov.sokratum.routings.configureChatRoutings
 import ru.kulishov.sokratum.routings.configureFileRoutings
 import ru.kulishov.sokratum.routings.configureSpaceRouting
+import kotlin.time.Duration.Companion.seconds
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -51,6 +56,15 @@ fun Application.module() {
             isLenient = true
             ignoreUnknownKeys = true
         })
+    }
+    install(WebSockets) {
+        contentConverter = KotlinxWebsocketSerializationConverter(Json {
+            ignoreUnknownKeys = true
+        })
+        pingPeriod = 20.seconds
+        timeout = 15.seconds
+        maxFrameSize = Long.MAX_VALUE
+        masking = false
     }
     JWTConfig.init(environment)
     DBFactory.init(environment)

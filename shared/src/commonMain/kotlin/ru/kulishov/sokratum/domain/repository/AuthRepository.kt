@@ -13,4 +13,6 @@ interface AuthRepository {
      fun getDevicesData():Flow<RefreshResult<DeviceDataResponse>>
 
     suspend fun getKey(): String?
+
+    suspend fun getModels(): List<String>
 }

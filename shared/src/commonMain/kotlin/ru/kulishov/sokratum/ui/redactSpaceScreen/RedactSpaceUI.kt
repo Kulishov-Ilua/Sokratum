@@ -120,7 +120,7 @@ fun RedactSpaceUI(
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.weight(1f)
                         )
-                        if (viewModel.spaceId >= 0) {
+                        if (viewModel.spaceId > 0) {
                             IconButton(
                                 onClick = {
                                     deleteDialogState = true
@@ -162,18 +162,22 @@ fun RedactSpaceUI(
                                         stringResource(Res.string.files),
                                         style = MaterialTheme.typography.titleLarge
                                     )
-                                    IconButton(
-                                        onClick = {
-                                            viewModel.addFiles()
+                                    if(viewModel.spaceId>=0){
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.addFiles()
+                                            }
+                                        ) {
+                                            Icon(
+                                                painterResource(Res.drawable.add),
+                                                contentDescription = "Add",
+                                            )
                                         }
-                                    ) {
-                                        Icon(
-                                            painterResource(Res.drawable.add),
-                                            contentDescription = "Add",
-                                        )
                                     }
 
+
                                 }
+
                                 if(uiState.value is RedactSpaceScreenViewModel.RedactSpaceUiState.Success){
                                     val files = (uiState.value as RedactSpaceScreenViewModel.RedactSpaceUiState.Success).items
                                     val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
@@ -256,9 +260,11 @@ fun RedactSpaceUI(
                                 confirmButton = {
                                     TextButton(onClick = {
                                         viewModel.deleteFile(deleteFileDialogState)
+                                        deleteFileDialogState = ""
                                     }) {
                                         Text(stringResource(Res.string.delete))
                                     }
+
                                 },
                                 dismissButton = {
                                     TextButton(onClick = { deleteFileDialogState = "" }) {

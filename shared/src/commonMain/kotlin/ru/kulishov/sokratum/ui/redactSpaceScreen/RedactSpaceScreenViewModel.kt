@@ -116,10 +116,13 @@ class RedactSpaceScreenViewModel(
 
     }
     fun delete(){
-        launch {
-            deleteSpaceUseCase(Space(spaceId,name, Clock.System.now().toLocalDateTime(TimeZone.UTC)))
-            _uiState.value= RedactSpaceUiState.Navigation(RedactSpaceNavigationRoutes.Home)
+        if(spaceId!=0.toLong()){
+            launch {
+                deleteSpaceUseCase(Space(spaceId,name, Clock.System.now().toLocalDateTime(TimeZone.UTC)))
+                _uiState.value= RedactSpaceUiState.Navigation(RedactSpaceNavigationRoutes.Home)
+            }
         }
+
     }
 
     sealed class RedactSpaceNavigationRoutes {

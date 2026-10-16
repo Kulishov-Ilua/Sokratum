@@ -91,7 +91,7 @@ class RedactChatScreenViewModel(
             }
             if (chat!= null) {
                 _uiState.value =
-                    RedactChatScreenUiState.Navigation(RedactChatScreenNavigationRoutes.Chat(chat.id))
+                    RedactChatScreenUiState.Navigation(RedactChatScreenNavigationRoutes.Chat(chat.id, spaceId, name))
             } else {
                 _uiState.value = RedactChatScreenUiState.Error("")
             }
@@ -101,7 +101,7 @@ class RedactChatScreenViewModel(
 
     sealed class RedactChatScreenNavigationRoutes {
         object Back : RedactChatScreenNavigationRoutes()
-        data class Chat(val chatId: Long) : RedactChatScreenNavigationRoutes()
+        data class Chat(val chatId: Long, val spaceId: Long, val chatName:String) : RedactChatScreenNavigationRoutes()
     }
 
     sealed class RedactChatScreenUiState {

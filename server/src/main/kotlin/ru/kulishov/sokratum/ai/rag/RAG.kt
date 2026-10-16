@@ -12,6 +12,9 @@ import java.io.File
 object RAG {
     private val storrages = mutableMapOf<Int, EmbeddingStoreContentRetriever>()
 
+    suspend fun deleteStorage(spaceId:Int){
+        storrages.remove(spaceId)
+    }
     suspend fun getRetriever(spaceId: Int): EmbeddingStoreContentRetriever {
         val storrageFind = storrages[spaceId]
         if (storrageFind != null) return storrageFind

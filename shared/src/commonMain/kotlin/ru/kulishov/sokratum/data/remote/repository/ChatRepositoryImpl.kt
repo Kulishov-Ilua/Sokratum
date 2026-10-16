@@ -28,8 +28,11 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
+import ru.kulishov.sokratum.data.ai.AIModels
 import ru.kulishov.sokratum.data.local.dao.ChatDao
 import ru.kulishov.sokratum.data.local.dao.MessageDao
 import ru.kulishov.sokratum.data.local.data.mapper.ChatMapper
@@ -38,6 +41,7 @@ import ru.kulishov.sokratum.data.local.data.mapper.SpaceMapper
 import ru.kulishov.sokratum.data.remote.KtorClient.BASE_URL
 import ru.kulishov.sokratum.data.remote.KtorClient.JWT_KEY
 import ru.kulishov.sokratum.data.remote.KtorClient.client
+import ru.kulishov.sokratum.data.remote.model.chats.SendMessageRequest
 import ru.kulishov.sokratum.domain.model.Chat
 import ru.kulishov.sokratum.domain.model.ChatAndMessages
 import ru.kulishov.sokratum.domain.model.Message
@@ -45,6 +49,8 @@ import ru.kulishov.sokratum.domain.model.RefreshError
 import ru.kulishov.sokratum.domain.model.RefreshResult
 import ru.kulishov.sokratum.domain.model.Space
 import ru.kulishov.sokratum.domain.repository.ChatRepository
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class ChatRepositoryImpl(
     private val chatDao: ChatDao,
@@ -174,25 +180,117 @@ class ChatRepositoryImpl(
 
     }
 
-    override suspend fun getChat(chatId: Long): ChatAndMessages? {
-        var ret: ChatAndMessages? = null
-        try {
-            val response = client.get("${BASE_URL}/getChatAndMessages/$chatId") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+    override  fun getChat(chatId: Long, spaceId:Long,  message:String?): Flow<RefreshResult<Message>> = flow{
+        var newChatId = chatId
+        if(chatId<0){
+            if(spaceId<0){
+                emit(RefreshResult.Error)
+                return@flow
+            }else{
+                val chat=addChat(Chat(-1,spaceId, Clock.System.now().toString(),"", Clock.System.now().toLocalDateTime(
+                    TimeZone.UTC) ))
+                if(chat!=null){
+                    chatDao.addChat(ChatMapper.toEntity(chat))
+                    newChatId=chat.id
+                    emit(RefreshResult.Fresh(emptyList()))
+                }else{
+                    emit(RefreshResult.Error)
+                    return@flow
                 }
             }
-            if (response.status == HttpStatusCode.OK) {
-                ret = response.body()
+        }else {
+            val cached = messageDao.getMessages(chatId.toLong())
+            if (cached.isNotEmpty()) {
+                emit(RefreshResult.Cached(cached.map { MessageMapper.toDomain(it) }))
             }
-        } catch (e: ClientRequestException) {
-            println("HTTP error: ${e.response.status}")
-            val errorBody = e.response.bodyAsText()
-            println("Error body: $errorBody")
-        } catch (e: Exception) {
-            println("Error: ${e.message}")
+
+            try{
+                val response = client.get("${BASE_URL}/getChatAndMessages/$chatId") {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+                    }
+                }
+                val ret: ChatAndMessages = response.body()
+                chatDao.addChat(ChatMapper.toEntity(Chat(
+                    id = ret.id.toLong(),
+                    spaceId =ret.spaceId.toLong(),
+                    name = ret.name,
+                    systemPrompt = ret.systemPrompt,
+                    lastOpen = Instant.fromEpochSeconds(ret.lastOpen).toLocalDateTime(TimeZone.UTC)
+                )))
+                messageDao.replaceAll(chatId.toLong(), ret.messages.messages.map { MessageMapper.toEntity(it) } )
+                emit(RefreshResult.Fresh(ret.messages.messages))
+
+            }catch (e: CancellationException) {
+                throw e
+            } catch (e: IOException) {
+                if (cached.isNotEmpty()) {
+                    emit(
+                        RefreshResult.Offline(
+                            cached.map { MessageMapper.toDomain(it) },
+                            RefreshError.Network
+                        )
+                    )
+                } else {
+                    emit(RefreshResult.Error)
+                }
+            } catch (e: ClientRequestException) {
+                val error = if (e.response.status == HttpStatusCode.Unauthorized) {
+                    RefreshError.Unauthorized
+                } else {
+                    RefreshError.Server(e.response.status.value)
+                }
+                if (cached.isNotEmpty()) {
+                    emit(RefreshResult.Offline(cached.map { MessageMapper.toDomain(it) }, error))
+                } else {
+                    emit(RefreshResult.Error)
+                }
+                return@flow
+            } catch (e: ServerResponseException) {
+                if (cached.isNotEmpty()) {
+                    emit(
+                        RefreshResult.Offline(
+                            cached.map { MessageMapper.toDomain(it) },
+                            RefreshError.Server(e.response.status.value)
+                        )
+                    )
+                } else {
+                    emit(RefreshResult.Error)
+                }
+                return@flow
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emit(RefreshResult.Error)
+                return@flow
+            }
         }
-        return ret
+        if(message!=null){
+            try {
+                val newMessage = Message(
+                    id = -1,
+                    idChat = newChatId.toInt(),
+                    isModel = false,
+                    text = message,
+                    sendTime = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                )
+                messageDao.addMessage(MessageMapper.toEntity(newMessage))
+                val messageResponse = sendMessage(SendMessageRequest(
+                    chatId = newChatId.toInt(),
+                    model = AIModels.model.name,
+                    text = message
+                ))
+                if(messageResponse!=null){
+                    messageDao.addMessage(MessageMapper.toEntity(messageResponse))
+                    emit(RefreshResult.Fresh(listOf(newMessage,messageResponse)))
+                }
+            }catch (e: ClientRequestException) {
+                println("HTTP error: ${e.response.status}")
+                val errorBody = e.response.bodyAsText()
+                println("Error body: $errorBody")
+            } catch (e: Exception) {
+                println("Error: ${e.message}")
+            }
+        }
     }
 
     override suspend fun getChatById(chatId: Long): Chat? {
@@ -216,8 +314,27 @@ class ChatRepositoryImpl(
         return ret
     }
 
-    override suspend fun addMessage(message: Message): Message? {
-        TODO("Not yet implemented")
+    override suspend fun sendMessage(message: SendMessageRequest): Message? {
+        var ret: Message?=null
+        try {
+            val response = client.post("${BASE_URL}/sendMessage") {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+                }
+                setBody(message)
+            }
+            if (response.status == HttpStatusCode.OK) {
+                ret = response.body()
+            }
+        } catch (e: ClientRequestException) {
+            println("HTTP error: ${e.response.status}")
+            val errorBody = e.response.bodyAsText()
+            println("Error body: $errorBody")
+        } catch (e: Exception) {
+            println("Error: ${e.message}")
+        }
+        return ret
     }
 
     override suspend fun updateMessages(
@@ -229,68 +346,93 @@ class ChatRepositoryImpl(
 
     override fun messages(
         chatId: Int,
+        spaceId:Long,
         afterMessageId: Long?,
         outgoing: Flow<Message>
     ): Flow<RefreshResult<Message>> = flow {
-
-        val cached = messageDao.getMessages(chatId.toLong())
-        if (cached.isNotEmpty()) {
-            emit(RefreshResult.Cached(cached.map { MessageMapper.toDomain(it) }))
-        }
-
         var cursor = afterMessageId?:-1L
-        try{
-            val response = client.get("${BASE_URL}/getChatAndMessages/$chatId") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+        if(chatId<0){
+            if(spaceId<0){
+                emit(RefreshResult.Error)
+                return@flow
+            }else{
+                val chat=addChat(Chat(-1,spaceId, Clock.System.now().toString(),"", Clock.System.now().toLocalDateTime(
+                    TimeZone.UTC) ))
+                if(chat!=null){
+                    chatDao.addChat(ChatMapper.toEntity(chat))
+                }else{
+                    emit(RefreshResult.Error)
+                    return@flow
                 }
             }
-            val ret: ChatAndMessages = response.body()
-            messageDao.replaceAll(chatId.toLong(), ret.messages.messages.map { MessageMapper.toEntity(it) } )
-            emit(RefreshResult.Fresh(ret.messages.messages))
-            cursor = ret.lastOpen
-        }catch (e: CancellationException) {
-            throw e
-        } catch (e: IOException) {
+        }else{
+            val cached = messageDao.getMessages(chatId.toLong())
             if (cached.isNotEmpty()) {
-                emit(
-                    RefreshResult.Offline(
-                        cached.map { MessageMapper.toDomain(it) },
-                        RefreshError.Network
+                emit(RefreshResult.Cached(cached.map { MessageMapper.toDomain(it) }))
+            }
+
+
+            try{
+                val response = client.get("${BASE_URL}/getChatAndMessages/$chatId") {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
+                    }
+                }
+                val ret: ChatAndMessages = response.body()
+                chatDao.addChat(ChatMapper.toEntity(Chat(
+                    id = ret.id.toLong(),
+                    spaceId =ret.spaceId.toLong(),
+                    name = ret.name,
+                    systemPrompt = ret.systemPrompt,
+                    lastOpen = Instant.fromEpochSeconds(ret.lastOpen).toLocalDateTime(TimeZone.UTC)
+                )))
+                messageDao.replaceAll(chatId.toLong(), ret.messages.messages.map { MessageMapper.toEntity(it) } )
+                emit(RefreshResult.Fresh(ret.messages.messages))
+                cursor = ret.lastOpen
+            }catch (e: CancellationException) {
+                throw e
+            } catch (e: IOException) {
+                if (cached.isNotEmpty()) {
+                    emit(
+                        RefreshResult.Offline(
+                            cached.map { MessageMapper.toDomain(it) },
+                            RefreshError.Network
+                        )
                     )
-                )
-            } else {
-                emit(RefreshResult.Error)
-            }
-        } catch (e: ClientRequestException) {
-            val error = if (e.response.status == HttpStatusCode.Unauthorized) {
-                RefreshError.Unauthorized
-            } else {
-                RefreshError.Server(e.response.status.value)
-            }
-            if (cached.isNotEmpty()) {
-                emit(RefreshResult.Offline(cached.map { MessageMapper.toDomain(it) }, error))
-            } else {
-                emit(RefreshResult.Error)
-            }
-            return@flow
-        } catch (e: ServerResponseException) {
-            if (cached.isNotEmpty()) {
-                emit(
-                    RefreshResult.Offline(
-                        cached.map { MessageMapper.toDomain(it) },
-                        RefreshError.Server(e.response.status.value)
+                } else {
+                    emit(RefreshResult.Error)
+                }
+            } catch (e: ClientRequestException) {
+                val error = if (e.response.status == HttpStatusCode.Unauthorized) {
+                    RefreshError.Unauthorized
+                } else {
+                    RefreshError.Server(e.response.status.value)
+                }
+                if (cached.isNotEmpty()) {
+                    emit(RefreshResult.Offline(cached.map { MessageMapper.toDomain(it) }, error))
+                } else {
+                    emit(RefreshResult.Error)
+                }
+                return@flow
+            } catch (e: ServerResponseException) {
+                if (cached.isNotEmpty()) {
+                    emit(
+                        RefreshResult.Offline(
+                            cached.map { MessageMapper.toDomain(it) },
+                            RefreshError.Server(e.response.status.value)
+                        )
                     )
-                )
-            } else {
+                } else {
+                    emit(RefreshResult.Error)
+                }
+                return@flow
+            } catch (e: Exception) {
+                e.printStackTrace()
                 emit(RefreshResult.Error)
+                return@flow
             }
-            return@flow
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emit(RefreshResult.Error)
-            return@flow
         }
+
 
         try {
             client.webSocket(

@@ -22,6 +22,8 @@ import ru.kulishov.sokratum.domain.model.SpaceRedactTransfer
 import ru.kulishov.sokratum.ui.DeviceData
 import ru.kulishov.sokratum.ui.authScreen.AuthScreenUI
 import ru.kulishov.sokratum.ui.authScreen.AuthScreenViewModel
+import ru.kulishov.sokratum.ui.chatScreen.ChatScreenUI
+import ru.kulishov.sokratum.ui.chatScreen.ChatScreenViewModel
 import ru.kulishov.sokratum.ui.homeScreen.HomeScreenUI
 import ru.kulishov.sokratum.ui.homeScreen.HomeScreenViewModel
 import ru.kulishov.sokratum.ui.navigation.NavigationRoutes
@@ -74,8 +76,22 @@ fun App(
                                             navController.navigate(NavigationRoutes.AuthScreen)
                                         }
 
-                                        is HomeScreenViewModel.HomeScreenNavigationRoutes.Chat -> TODO()
-                                        HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat -> TODO()
+                                        is HomeScreenViewModel.HomeScreenNavigationRoutes.Chat -> {
+
+                                            navController.navigate(NavigationRoutes.ChatScreen(
+                                                chatId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).chatID,
+                                                spaceId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).spaceId,
+                                                chatName =  (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).chatName,
+                                            ))
+                                        }
+                                        is HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat -> {
+                                            navController.navigate(NavigationRoutes.ChatScreen(
+                                                chatId = -1,
+                                                spaceId = 0,
+                                                chatName = "New chat",
+                                                message = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat).message
+                                            ))
+                                        }
                                         HomeScreenViewModel.HomeScreenNavigationRoutes.Settings -> navController.navigate(
                                             NavigationRoutes.SettingScreen
                                         )
@@ -144,7 +160,12 @@ fun App(
                                         RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Back -> navController.navigate(
                                             NavigationRoutes.HomeScreen)
                                         is RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat -> navController.navigate(
-                                            NavigationRoutes.HomeScreen)
+                                            NavigationRoutes.ChatScreen(
+                                                chatId = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).chatId,
+                                                spaceId = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).spaceId,
+                                                chatName = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).chatName,
+                                                message = ""
+                                            ))
                                     }
                                 }
                             )
@@ -161,13 +182,41 @@ fun App(
                                         is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatRedact -> {
                                             navController.navigate(NavigationRoutes.ChatRedactScreen(it.chatId,it.spaceId))
                                         }
-                                        is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen -> TODO()
-                                        is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend -> TODO()
+                                        is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen -> navController.navigate(
+                                            NavigationRoutes.ChatScreen(
+                                                chatId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).chatID,
+                                                spaceId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).spaceId,
+                                                chatName = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).chatName,
+                                            ))
+                                        is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend -> navController.navigate(
+                                            NavigationRoutes.ChatScreen(
+                                                chatId = -1,
+                                                spaceId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend).spaceId,
+                                                chatName = "New chat",
+                                                message = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend).message
+                                            ))
                                         is SpaceScreenViewModel.SpaceScreenNavigationRoutes.SpaceRedact -> navController.navigate(
                                             NavigationRoutes.SpaceRedactScreen(spaceId,spaceName))
                                     }
                                 }
                             )
+                        }
+                        composable<NavigationRoutes.ChatScreen> {backStackEntry->
+                            val (chatId,spaceId, chatName, message) = backStackEntry.toRoute<NavigationRoutes.ChatScreen>()
+                            ChatScreenUI(koinViewModel<ChatScreenViewModel> { parametersOf(chatId,chatName, spaceId,message) }, {
+                                when (it) {
+                                    ChatScreenViewModel.ChatScreenNavigationRoutes.Back -> {
+                                        if(spaceId>=0){
+                                            navController.navigate(NavigationRoutes.SpaceScreen(spaceId,""))
+                                        }else{
+                                            navController.navigate(NavigationRoutes.HomeScreen)
+                                        }
+                                    }
+                                    is ChatScreenViewModel.ChatScreenNavigationRoutes.ChatSettings -> navController.navigate(
+                                        NavigationRoutes.ChatRedactScreen(chatId,spaceId)
+                                    )
+                                }
+                            })
                         }
                     }
                 }
