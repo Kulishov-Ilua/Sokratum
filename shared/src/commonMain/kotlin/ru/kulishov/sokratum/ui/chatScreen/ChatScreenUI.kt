@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -40,6 +41,7 @@ import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import ru.kulishov.markweave.repository.MDParse
 import ru.kulishov.sokratum.ui.DeviceData
 import ru.kulishov.sokratum.ui.elements.MessageUI
 import ru.kulishov.sokratum.ui.elements.UpsElement
@@ -47,6 +49,7 @@ import sokratum.shared.generated.resources.Res
 import sokratum.shared.generated.resources.back
 import sokratum.shared.generated.resources.keyboard_arrow_right
 import sokratum.shared.generated.resources.new_chat
+import sokratum.shared.generated.resources.new_message
 import sokratum.shared.generated.resources.no_internet_connection
 import sokratum.shared.generated.resources.quick_chat
 import sokratum.shared.generated.resources.settings
@@ -97,13 +100,17 @@ fun ChatScreenUI(
 
         is ChatScreenViewModel.ChatScreenUiState.Success -> {
             Column(
-                verticalArrangement = Arrangement.spacedBy(15.dp)
+                Modifier.padding(top=15.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(15.dp)
+                Column(
+                    modifier = Modifier.widthIn(max = 825.dp),
+                    verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
-                    if (isPhone) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(15.dp)
+                    ) {
+
                         Box(
                             Modifier.size(56.dp).clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surfaceContainer)
@@ -117,17 +124,17 @@ fun ChatScreenUI(
                                 contentDescription = "back"
                             )
                         }
-                    }
 
-                    Text(
-                        if (viewModel.chatName.isNotBlank()) viewModel.chatName else stringResource(
-                            Res.string.new_chat
-                        ),
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center
-                    )
-                    if (isPhone) {
+
+                        Text(
+                            if (viewModel.chatName.isNotBlank()) viewModel.chatName else stringResource(
+                                Res.string.new_chat
+                            ),
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center
+                        )
+
                         Box(
                             Modifier.size(56.dp).clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surfaceContainer)
@@ -145,104 +152,127 @@ fun ChatScreenUI(
                                 contentDescription = "settings",
                             )
                         }
+
+
                     }
-
-                }
-                val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
-                val messages =
-                    (uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).items
-                var currentDate = messages.firstOrNull()?.sendTime ?: now
-                val listState =
-                    rememberLazyListState(if (messages.isNotEmpty()) messages.size - 1 else 0)
+                    val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                    val messages =
+                        (uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).items
+                    var currentDate = messages.firstOrNull()?.sendTime ?: now
+                    val listState =
+                        rememberLazyListState(if (messages.isNotEmpty()) messages.size - 1 else 0)
 
 
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(5.dp),
-                    modifier = Modifier.weight(1f),
-                    state = listState
-                ) {
-                    items(messages) { message ->
-                        if (message.isModel) {
-                            Text(message.text)
-                        } else {
-                            var time: String? = null
-                            if (message.sendTime != null) {
-                                val h = message.sendTime.hour.toString().padStart(2, '0')
-                                val m = message.sendTime.minute.toString().padStart(2, '0')
-                                time = "$h:$m"
-
-                                if (message.sendTime.date != currentDate.date) {
-                                    val day = message.sendTime.day.toString().padStart(2, '0')
-                                    val month =
-                                        message.sendTime.month.number.toString().padStart(2, '0')
-                                    val year = message.sendTime.year
-                                    Box(
-                                        Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            "$day.$month.$year",
-                                            style = MaterialTheme.typography.bodyLarge
-                                        )
-                                    }
-                                    currentDate = message.sendTime
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier.weight(1f),
+                        state = listState
+                    ) {
+                        items(messages) { message ->
+                            if (message.isModel) {
+                                val layout = MDParse.mdParser(message.text, MaterialTheme.typography.bodyMedium,
+                                    MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.surfaceContainer)
+                                for(x in layout){
+                                    x()
                                 }
+                            } else {
+                                var time: String? = null
+                                if (message.sendTime != null) {
+                                    val h = message.sendTime.hour.toString().padStart(2, '0')
+                                    val m = message.sendTime.minute.toString().padStart(2, '0')
+                                    time = "$h:$m"
 
+                                    if (message.sendTime.date != currentDate.date) {
+                                        val day = message.sendTime.day.toString().padStart(2, '0')
+                                        val month =
+                                            message.sendTime.month.number.toString()
+                                                .padStart(2, '0')
+                                        val year = message.sendTime.year
+                                        Box(
+                                            Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                "$day.$month.$year",
+                                                style = MaterialTheme.typography.bodyLarge
+                                            )
+                                        }
+                                        currentDate = message.sendTime
+                                    }
+
+                                }
+                                MessageUI(
+                                    date = if (time != null) {
+                                        {
+                                            Text(
+                                                time,
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = MaterialTheme.colorScheme.surface
+                                                )
+                                            )
+                                        }
+                                    } else null
+                                ) {
+                                    Text(
+                                        message.text,
+                                        style = MaterialTheme.typography.titleSmall.copy(color = MaterialTheme.colorScheme.surface)
+                                    )
+                                }
                             }
-                            MessageUI(
-                                date = if (time != null) {
-                                    { Text(time, style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.surface)) }
-                                } else null
+
+                        }
+                    }
+                    if ((uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).e == null || (uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).e == "send") {
+                        val searchBarState = rememberSearchBarState()
+                        val textFieldState = rememberTextFieldState()
+                        val inputField = @Composable {
+                            SearchBarDefaults.InputField(
+                                searchBarState = searchBarState,
+                                textFieldState = textFieldState,
+                                onSearch = {
+                                },
+                                placeholder = { Text(stringResource(Res.string.new_message)) },
+                                leadingIcon = null,
+                                trailingIcon = {
+                                    if (textFieldState.text.isNotEmpty() && (uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).e != "send") {
+                                        IconButton(onClick = {
+                                            viewModel.request(textFieldState.text.toString())
+                                            textFieldState.clearText()
+                                        }) {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.keyboard_arrow_right),
+                                                contentDescription = "send"
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        SearchBar(
+                            state = searchBarState,
+                            inputField = inputField,
+                            modifier = Modifier.padding(bottom = 15.dp).fillMaxWidth()
+                        )
+
+                    } else {
+                        Box(
+                            Modifier.padding(bottom = 15.dp).fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                Modifier.clip(CircleShape)
+                                    .background(
+                                        MaterialTheme.colorScheme.errorContainer
+                                    )
                             ) {
-                                Text(message.text, style = MaterialTheme.typography.titleSmall.copy(color = MaterialTheme.colorScheme.surface))
+                                Text(
+                                    stringResource(Res.string.no_internet_connection),
+                                    style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onErrorContainer),
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
                             }
                         }
 
-                    }
-                }
-                if ((uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).e == null || (uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).e == "send") {
-                    val searchBarState = rememberSearchBarState()
-                    val textFieldState = rememberTextFieldState()
-                    val inputField = @Composable {
-                        SearchBarDefaults.InputField(
-                            searchBarState = searchBarState,
-                            textFieldState = textFieldState,
-                            onSearch = {
-                            },
-                            placeholder = { Text(stringResource(Res.string.quick_chat)) },
-                            leadingIcon = null,
-                            trailingIcon = {
-                                if (textFieldState.text.isNotEmpty() && (uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).e != "send") {
-                                    IconButton(onClick = {
-                                        viewModel.request(textFieldState.text.toString())
-                                        textFieldState.clearText()
-                                    }) {
-                                        Icon(
-                                            painter = painterResource(Res.drawable.keyboard_arrow_right),
-                                            contentDescription = "send"
-                                        )
-                                    }
-                                }
-                            }
-                        )
-                    }
-                    SearchBar(
-                        state = searchBarState,
-                        inputField = inputField,
-                        modifier = Modifier.padding(bottom = 15.dp).fillMaxWidth()
-                    )
-
-                } else {
-                    Box(
-                        Modifier.padding(horizontal = 16.dp, vertical = 8.dp).clip(CircleShape)
-                            .background(
-                                MaterialTheme.colorScheme.errorContainer
-                            )
-                    ) {
-                        Text(
-                            stringResource(Res.string.no_internet_connection),
-                            style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onErrorContainer)
-                        )
                     }
                 }
             }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -62,9 +63,50 @@ fun SettingScreenUI(
 ) {
     val uiState =
         viewModel.uiState.collectAsStateWithLifecycle(SettingScreenViewModel.SettingScreenUiState.Loading)
-    if ((DeviceData.actualPlatform == null || DeviceData.actualPlatform is DeviceData.Platforms.Phone || DeviceData.actualPlatform is DeviceData.Platforms.WebPhone)) {
-        when (uiState.value) {
-            is SettingScreenViewModel.SettingScreenUiState.Error -> {
+    when (uiState.value) {
+        is SettingScreenViewModel.SettingScreenUiState.Error -> {
+            Column(
+                modifier = Modifier.widthIn(max = 825.dp),
+                verticalArrangement = Arrangement.spacedBy(15.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(15.dp)
+                ) {
+                    Box(
+                        Modifier.size(56.dp).clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .clickable {
+                                onNavigate(SettingScreenViewModel.SettingScreenNavigationRoutes.Back)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.back),
+                            contentDescription = "back"
+                        )
+                    }
+                    Text(
+                        stringResource(Res.string.settings),
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+                    Box(
+                        Modifier.size(56.dp).clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .clickable {
+                                onNavigate(SettingScreenViewModel.SettingScreenNavigationRoutes.LogOut)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.logout),
+                            contentDescription = "Log out",
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -86,20 +128,23 @@ fun SettingScreenUI(
                     }
                 }
             }
+        }
 
-            SettingScreenViewModel.SettingScreenUiState.Loading -> {
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    LoadingIndicator()
-                }
+        SettingScreenViewModel.SettingScreenUiState.Loading -> {
+            Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingIndicator()
             }
+        }
 
-            is SettingScreenViewModel.SettingScreenUiState.Success -> {
-                val devices =
-                    (uiState.value as SettingScreenViewModel.SettingScreenUiState.Success).items
+        is SettingScreenViewModel.SettingScreenUiState.Success -> {
+            val devices =
+                (uiState.value as SettingScreenViewModel.SettingScreenUiState.Success).items
+            Column(Modifier.padding(top=15.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Column(
+                    modifier = Modifier.widthIn(max = 825.dp),
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     Row(
@@ -150,7 +195,10 @@ fun SettingScreenUI(
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(15.dp),
-                                modifier = Modifier.padding(horizontal = 25.dp, vertical = 20.dp)
+                                modifier = Modifier.padding(
+                                    horizontal = 25.dp,
+                                    vertical = 20.dp
+                                )
                             ) {
                                 Icon(
                                     painter = painterResource(Res.drawable.computer),
@@ -198,10 +246,10 @@ fun SettingScreenUI(
                                     },
                                     trailingIcon = {
                                         Icon(
-                                            modifier = Modifier.clickable{
-                                                if(viewModel.key.isBlank()){
+                                            modifier = Modifier.clickable {
+                                                if (viewModel.key.isBlank()) {
                                                     viewModel.getKey()
-                                                }else{
+                                                } else {
                                                     viewModel.deleteKey()
                                                 }
                                             },
@@ -211,7 +259,12 @@ fun SettingScreenUI(
                                             contentDescription = "get key"
                                         )
                                     },
-                                    label = {Text(stringResource(Res.string.key), style = MaterialTheme.typography.bodySmall)},
+                                    label = {
+                                        Text(
+                                            stringResource(Res.string.key),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    },
                                     colors = TextFieldDefaults.colors().copy(
                                         focusedIndicatorColor = Color.Transparent,
                                         unfocusedIndicatorColor = Color.Transparent,
@@ -228,7 +281,5 @@ fun SettingScreenUI(
                 }
             }
         }
-    } else {
-
     }
 }

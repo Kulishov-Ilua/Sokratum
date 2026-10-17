@@ -1,4 +1,14 @@
+import java.util.Properties
+
+
 rootProject.name = "Sokratum"
+
+val localProperties = Properties().apply {
+    val file = rootDir.resolve("local.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+}
 
 pluginManagement {
     repositories {
@@ -24,6 +34,15 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        maven {
+            credentials {
+                username = localProperties.getProperty("gpr.user")
+                password = localProperties.getProperty("gpr.key")
+
+            }
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Kulishov-Ilua/MarkWeave")
+        }
     }
 }
 

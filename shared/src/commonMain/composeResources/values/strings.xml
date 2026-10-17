@@ -65,5 +65,7 @@ For cloud services, the key is issued when you register on the provider's websit
     <string name="uploaded">Uploaded</string>
     <string name="new_chat">New chat</string>
     <string name="no_internet_connection">No internet connection</string>
+    <string name="discuss_something">It’s time\nto discuss something!</string>
+    <string name="new_message">New message</string>
 </resources>
 

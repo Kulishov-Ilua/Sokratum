@@ -71,7 +71,7 @@ class ChatRepositoryImpl(
             }
             val body: List<Chat> = response.body()
             chatDao.replaceAll(body.map { ChatMapper.toEntity(it) })
-            emit(RefreshResult.Fresh(if (body.size > 2) body.subList(0, 2) else body))
+            emit(RefreshResult.Fresh(if (body.size > 2) body.subList(0, 3) else body))
         } catch (e: CancellationException) {
             throw e
         } catch (e: IOException) {

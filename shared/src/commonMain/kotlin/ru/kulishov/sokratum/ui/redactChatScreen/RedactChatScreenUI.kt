@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -55,48 +56,56 @@ import sokratum.shared.generated.resources.system_prompt
 @Composable
 fun RedactChatScreenUI(
     viewModel: RedactChatScreenViewModel,
-    onNavigate:(RedactChatScreenViewModel.RedactChatScreenNavigationRoutes)->Unit
-){
+    onNavigate: (RedactChatScreenViewModel.RedactChatScreenNavigationRoutes) -> Unit
+) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    if ((DeviceData.actualPlatform == null || DeviceData.actualPlatform is DeviceData.Platforms.Phone || DeviceData.actualPlatform is DeviceData.Platforms.WebPhone)) {
-        when (uiState.value) {
-            is RedactChatScreenViewModel.RedactChatScreenUiState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+    when (uiState.value) {
+        is RedactChatScreenViewModel.RedactChatScreenUiState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                UpsElement()
+            }
+            Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Button(
+                    onClick = { onNavigate(RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Back) },
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                 ) {
-                    UpsElement()
-                }
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    Button(
-                        onClick = { onNavigate(RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Back) },
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.back),
-                            style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.surface)
-                        )
-                    }
+                    Text(
+                        text = stringResource(Res.string.back),
+                        style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.surface)
+                    )
                 }
             }
-            RedactChatScreenViewModel.RedactChatScreenUiState.Loading -> {
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    LoadingIndicator()
-                }
+        }
+
+        RedactChatScreenViewModel.RedactChatScreenUiState.Loading -> {
+            Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingIndicator()
             }
-            is RedactChatScreenViewModel.RedactChatScreenUiState.Navigation -> {
-                val route = (uiState.value as RedactChatScreenViewModel.RedactChatScreenUiState.Navigation).route
-                onNavigate(route)
-            }
-            RedactChatScreenViewModel.RedactChatScreenUiState.Success -> {
-                var deleteDialogState by remember { mutableStateOf(false) }
+        }
+
+        is RedactChatScreenViewModel.RedactChatScreenUiState.Navigation -> {
+            val route =
+                (uiState.value as RedactChatScreenViewModel.RedactChatScreenUiState.Navigation).route
+            onNavigate(route)
+        }
+
+        RedactChatScreenViewModel.RedactChatScreenUiState.Success -> {
+            var deleteDialogState by remember { mutableStateOf(false) }
+            Column(
+                Modifier.padding(top = 15.dp).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Column(
+                    modifier = Modifier.widthIn(max = 825.dp),
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     Row(
@@ -107,20 +116,25 @@ fun RedactChatScreenUI(
                             onClick = {
                                 onNavigate(RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Back)
                             }
-                        ){
+                        ) {
                             Icon(painterResource(Res.drawable.back), contentDescription = "back")
                         }
-                        Text(stringResource(if(viewModel.chatId<0) Res.string.creation_of_chat else Res.string.redaction_of_chat),
+                        Text(
+                            stringResource(if (viewModel.chatId < 0) Res.string.creation_of_chat else Res.string.redaction_of_chat),
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.weight(1f))
-                        if(viewModel.chatId>=0){
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (viewModel.chatId >= 0) {
                             IconButton(
                                 onClick = {
-                                    deleteDialogState=true
+                                    deleteDialogState = true
                                 }
-                            ){
-                                Icon(painterResource(Res.drawable.delete), contentDescription = "delete",
-                                    tint = MaterialTheme.colorScheme.error)
+                            ) {
+                                Icon(
+                                    painterResource(Res.drawable.delete),
+                                    contentDescription = "delete",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
                             }
                         }
 
@@ -131,26 +145,40 @@ fun RedactChatScreenUI(
                     ) {
                         TextFieldCustom(
                             value = viewModel.name,
-                            onValueChange = {viewModel.name=it},
-                            label = {Text(stringResource(Res.string.chat_name), style = MaterialTheme.typography.bodySmall)}
+                            onValueChange = { viewModel.name = it },
+                            label = {
+                                Text(
+                                    stringResource(Res.string.chat_name),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         )
                         TextFieldCustom(
                             value = viewModel.systemPrompt,
-                            onValueChange = {viewModel.systemPrompt=it},
-                            label = {Text(stringResource(Res.string.system_prompt), style = MaterialTheme.typography.bodySmall)},
+                            onValueChange = { viewModel.systemPrompt = it },
+                            label = {
+                                Text(
+                                    stringResource(Res.string.system_prompt),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            },
                             modifier = Modifier.heightIn(min = 200.dp).fillMaxWidth()
                         )
                     }
-                    Column(verticalArrangement = Arrangement.spacedBy(5.dp),
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(bottom = 15.dp)) {
+                        modifier = Modifier.padding(bottom = 15.dp)
+                    ) {
                         Row {
                             Button(
-                                onClick = {viewModel.redact()},
+                                onClick = { viewModel.redact() },
                                 modifier = Modifier.fillMaxWidth()
-                            ){
-                                Text(stringResource(if(viewModel.spaceId<0) Res.string.create else Res.string.save),
-                                    style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.surface))
+                            ) {
+                                Text(
+                                    stringResource(if (viewModel.spaceId < 0) Res.string.create else Res.string.save),
+                                    style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.surface)
+                                )
                             }
 
                             //Text(text = )
@@ -158,31 +186,33 @@ fun RedactChatScreenUI(
                     }
 
                 }
-                if(deleteDialogState){
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                        AlertDialog(
-                            onDismissRequest = {deleteDialogState=false},
-                            title = {Text(stringResource(Res.string.are_you_sure),
-                                style = MaterialTheme.typography.headlineSmall)},
-                            text = { Text(stringResource(Res.string.delete_assert)) },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    viewModel.delete()
-                                }) {
-                                    Text(stringResource(Res.string.delete))
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = {deleteDialogState=false}) {
-                                    Text(stringResource(Res.string.cancel))
-                                }
-                            },
-                        )
-                    }
+            }
+            if (deleteDialogState) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    AlertDialog(
+                        onDismissRequest = { deleteDialogState = false },
+                        title = {
+                            Text(
+                                stringResource(Res.string.are_you_sure),
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        },
+                        text = { Text(stringResource(Res.string.delete_assert)) },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                viewModel.delete()
+                            }) {
+                                Text(stringResource(Res.string.delete))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { deleteDialogState = false }) {
+                                Text(stringResource(Res.string.cancel))
+                            }
+                        },
+                    )
                 }
             }
         }
-    }else{
-
     }
 }

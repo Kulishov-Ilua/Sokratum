@@ -10,7 +10,8 @@ import kotlin.time.Clock
 
 actual class ModelRequestRepositoryImpl actual constructor() :
     ModelRequestRepository {
-    actual override suspend fun sendMessage(message: ModelRequest): Message? {
+    actual override suspend fun sendMessage(message: ModelRequest): Message? =null
+    //{
 //        val model = AIModels.actualModel
 //        if(model==null) return null
 //        val agent = AgenticServices
@@ -28,7 +29,7 @@ actual class ModelRequestRepositoryImpl actual constructor() :
 //            text = answer,
 //            sendTime = Clock.System.now().epochSeconds
 //        )
-    }
+//    }
 
     actual override suspend fun modelRequest(request: ModelRequest): String? {
         val newChatModel = OpenAiChatModel.builder()

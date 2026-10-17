@@ -3,7 +3,7 @@ import SwiftUI
 @main
 struct iOSApp: App {
     init(){
-        KoinHelperKt.doInitKoin()
+        initKoin()
     }
     var body: some Scene {
         WindowGroup {

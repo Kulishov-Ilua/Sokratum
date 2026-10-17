@@ -59,11 +59,13 @@
     <string name="delete">Удалить</string>
     <string name="cancel">Отменить</string>
     <string name="creation_of_chat">Создание чата</string>
-    <string name="redaction_of_chat">Редактирование чатаt</string>
+    <string name="redaction_of_chat">Редактирование чата</string>
     <string name="chat_name">Название name</string>
     <string name="system_prompt">Системный промпт</string>
     <string name="files">Файлы:</string>
     <string name="uploaded">Загружен</string>
     <string name="new_chat">Новый чат</string>
     <string name="no_internet_connection">Отсутствует подключение к интернету</string>
+    <string name="discuss_something">Самое время\nчто-нибудь обсудить!</string>
+    <string name="new_message">Новое сообщение</string>
 </resources>

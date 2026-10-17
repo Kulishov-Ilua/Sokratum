@@ -7,7 +7,11 @@ object KtorClient {
 
     var JWT_KEY = ""
     var username = ""
-    val BASE_URL = "http://10.0.2.2:3000"
+
+    private const val debugPhone = "http://10.0.2.2:3000"
+    private const val debugDesctop = "http://localhost:3000"
+
+    val BASE_URL = debugDesctop
 
     fun unAuth() {
         JWT_KEY = ""

@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,11 +44,17 @@ fun App(
 ) {
     val windowWidth = LocalWindowInfo.current.containerDpSize.width
 
-    val platform = if (windowWidth < 600.dp) DeviceData.Platforms.Phone(
-        DeviceData.OS.NotFound,
-        ""
-    ) else DeviceData.Platforms.Desktop(DeviceData.OS.NotFound, "${windowWidth.value.toInt()}")
-    val width = 1195
+    val platform = remember(windowWidth) {
+        if (windowWidth < 1000.dp) {
+            DeviceData.Platforms.Phone(DeviceData.OS.NotFound, "")
+        } else {
+            DeviceData.Platforms.Desktop(
+                DeviceData.OS.NotFound,
+                windowWidth.value.toInt().toString()
+            )
+        }
+    }
+
 
     val navController = rememberNavController()
 
@@ -68,6 +75,7 @@ fun App(
                         }
                         composable<NavigationRoutes.HomeScreen> {
                             HomeScreenUI(
+                                platform=platform,
                                 viewModel = koinViewModel<HomeScreenViewModel>(),
                                 onNavigate = {
                                     when (it) {
@@ -173,6 +181,7 @@ fun App(
                         composable<NavigationRoutes.SpaceScreen> { backStackEntry ->
                             val (spaceId, spaceName) = backStackEntry.toRoute<NavigationRoutes.SpaceScreen>()
                             SpaceScreenUI(
+                                platform=platform,
                                 viewModel = koinViewModel<SpaceScreenViewModel>{
                                     parametersOf(spaceId) },
                                 onNavigate = {

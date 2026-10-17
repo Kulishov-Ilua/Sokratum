@@ -1,6 +1,5 @@
 package ru.kulishov.sokratum.ui.redactSpaceScreen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -28,18 +28,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import ru.kulishov.sokratum.domain.model.Space
-import ru.kulishov.sokratum.ui.DeviceData
 import ru.kulishov.sokratum.ui.elements.FileCardUI
 import ru.kulishov.sokratum.ui.elements.TextFieldCustom
 import ru.kulishov.sokratum.ui.elements.UpsElement
-import ru.kulishov.sokratum.ui.homeScreen.HomeScreenViewModel
 import sokratum.shared.generated.resources.Res
 import sokratum.shared.generated.resources.add
 import sokratum.shared.generated.resources.are_you_sure
@@ -53,55 +49,61 @@ import sokratum.shared.generated.resources.files
 import sokratum.shared.generated.resources.redaction_of_space
 import sokratum.shared.generated.resources.save
 import sokratum.shared.generated.resources.space_name
-import sokratum.shared.generated.resources.spaces
 import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RedactSpaceUI(
     viewModel: RedactSpaceScreenViewModel,
-    onNavigate:(RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes)-> Unit
+    onNavigate: (RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes) -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    if ((DeviceData.actualPlatform == null || DeviceData.actualPlatform is DeviceData.Platforms.Phone || DeviceData.actualPlatform is DeviceData.Platforms.WebPhone)) {
-        when (uiState.value) {
-            is RedactSpaceScreenViewModel.RedactSpaceUiState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+    when (uiState.value) {
+        is RedactSpaceScreenViewModel.RedactSpaceUiState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                UpsElement()
+            }
+            Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Button(
+                    onClick = { onNavigate(RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Home) },
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                 ) {
-                    UpsElement()
-                }
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    Button(
-                        onClick = { onNavigate(RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Home) },
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.back),
-                            style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.surface)
-                        )
-                    }
+                    Text(
+                        text = stringResource(Res.string.back),
+                        style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.surface)
+                    )
                 }
             }
-            RedactSpaceScreenViewModel.RedactSpaceUiState.Loading -> {
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    LoadingIndicator()
-                }
+        }
+
+        RedactSpaceScreenViewModel.RedactSpaceUiState.Loading -> {
+            Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingIndicator()
             }
-            is RedactSpaceScreenViewModel.RedactSpaceUiState.Navigation -> {
-                onNavigate((uiState.value as RedactSpaceScreenViewModel.RedactSpaceUiState.Navigation).route)
-            }
-            is RedactSpaceScreenViewModel.RedactSpaceUiState.Success, RedactSpaceScreenViewModel.RedactSpaceUiState.LoadingFiles -> {
-                var deleteDialogState by remember { mutableStateOf(false) }
-                var deleteFileDialogState by remember { mutableStateOf("") }
+        }
+
+        is RedactSpaceScreenViewModel.RedactSpaceUiState.Navigation -> {
+            onNavigate((uiState.value as RedactSpaceScreenViewModel.RedactSpaceUiState.Navigation).route)
+        }
+
+        is RedactSpaceScreenViewModel.RedactSpaceUiState.Success, RedactSpaceScreenViewModel.RedactSpaceUiState.LoadingFiles -> {
+            var deleteDialogState by remember { mutableStateOf(false) }
+            var deleteFileDialogState by remember { mutableStateOf("") }
+            Column(
+                Modifier.padding(top = 15.dp).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Column(
+                    modifier = Modifier.widthIn(max = 825.dp),
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     Row(
@@ -113,7 +115,10 @@ fun RedactSpaceUI(
                                 onNavigate(RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Home)
                             }
                         ) {
-                            Icon(painterResource(Res.drawable.back), contentDescription = "back")
+                            Icon(
+                                painterResource(Res.drawable.back),
+                                contentDescription = "back"
+                            )
                         }
                         Text(
                             stringResource(if (viewModel.spaceId < 0) Res.string.creation_of_space else Res.string.redaction_of_space),
@@ -162,7 +167,7 @@ fun RedactSpaceUI(
                                         stringResource(Res.string.files),
                                         style = MaterialTheme.typography.titleLarge
                                     )
-                                    if(viewModel.spaceId>=0){
+                                    if (viewModel.spaceId >= 0) {
                                         IconButton(
                                             onClick = {
                                                 viewModel.addFiles()
@@ -178,20 +183,24 @@ fun RedactSpaceUI(
 
                                 }
 
-                                if(uiState.value is RedactSpaceScreenViewModel.RedactSpaceUiState.Success){
-                                    val files = (uiState.value as RedactSpaceScreenViewModel.RedactSpaceUiState.Success).items
+                                if (uiState.value is RedactSpaceScreenViewModel.RedactSpaceUiState.Success) {
+                                    val files =
+                                        (uiState.value as RedactSpaceScreenViewModel.RedactSpaceUiState.Success).items
                                     val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
                                     LazyColumn(
                                         verticalArrangement = Arrangement.spacedBy(5.dp)
                                     ) {
-                                        items(files){ file->
-                                            FileCardUI(file.name,file.uploadedAt,now,{
-                                                deleteFileDialogState=file.id
+                                        items(files) { file ->
+                                            FileCardUI(file.name, file.uploadedAt, now, {
+                                                deleteFileDialogState = file.id
                                             })
                                         }
                                     }
-                                }else{
-                                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                                } else {
+                                    Box(
+                                        Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
                                         LoadingIndicator()
                                     }
                                 }
@@ -209,7 +218,9 @@ fun RedactSpaceUI(
                                     ) {
                                         Text(
                                             stringResource(if (viewModel.spaceId < 0) Res.string.create else Res.string.save),
-                                            style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.surface)
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                color = MaterialTheme.colorScheme.surface
+                                            )
                                         )
                                     }
 
@@ -278,7 +289,5 @@ fun RedactSpaceUI(
                 }
             }
         }
-    }else{
-
     }
 }

@@ -116,6 +116,8 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.websocket)
 
+            implementation("MarkWeave:shared:0.0.2")
+
         }
 
         commonTest.dependencies {
