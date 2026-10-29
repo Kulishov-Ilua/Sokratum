@@ -106,7 +106,7 @@ fun SpaceScreenUI(
                 (uiState.value as SpaceScreenViewModel.SpaceScreenUiState.Success).spaceName
             val id = (uiState.value as SpaceScreenViewModel.SpaceScreenUiState.Success).spaceId
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = if ((platform == null || platform is DeviceData.Platforms.Phone || platform is DeviceData.Platforms.WebPhone)) Arrangement.Center else Arrangement.Start
             ) {
                 Column(modifier = Modifier.padding(vertical = 15.dp).widthIn(max = 400.dp)) {

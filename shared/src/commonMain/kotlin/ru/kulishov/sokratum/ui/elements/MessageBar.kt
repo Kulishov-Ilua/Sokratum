@@ -22,6 +22,8 @@ fun MessageBar(
     placeholder: String,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
+    singleLine: Boolean = true,
+    maxLines:Int = 4,
     modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
@@ -48,7 +50,9 @@ fun MessageBar(
 
             }
         } else null,
-        singleLine = true,
+        singleLine = singleLine,
+        minLines=1,
+        maxLines= if(singleLine) 1 else maxLines,
         shape = CircleShape,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,

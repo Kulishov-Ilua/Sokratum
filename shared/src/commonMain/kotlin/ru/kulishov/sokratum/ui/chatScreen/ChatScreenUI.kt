@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -107,7 +108,7 @@ fun ChatScreenUI(
 
         is ChatScreenViewModel.ChatScreenUiState.Success -> {
             Column(
-                Modifier.padding(top=15.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
+               modifier = Modifier.padding(top=15.dp).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
                     modifier = Modifier.widthIn(max = 825.dp),
@@ -236,6 +237,7 @@ fun ChatScreenUI(
                             onQueryChange = { query=it },
                             onSend = {
                                     viewModel.request(query)
+                                query=""
                             },
                             placeholder = stringResource(Res.string.new_message),
                             leadingIcon = null,
@@ -245,7 +247,9 @@ fun ChatScreenUI(
                                     contentDescription = "send"
                                 )
                             },
-                            modifier = Modifier.height(56.dp)
+                            singleLine = false,
+                            maxLines = 4,
+                            modifier = Modifier.padding(bottom = 15.dp).heightIn(min = 56.dp)
                         )
 
                     } else {
