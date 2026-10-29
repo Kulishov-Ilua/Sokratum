@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -30,6 +31,10 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,8 +48,10 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import ru.kulishov.markweave.repository.MDParse
 import ru.kulishov.sokratum.ui.DeviceData
+import ru.kulishov.sokratum.ui.elements.MessageBar
 import ru.kulishov.sokratum.ui.elements.MessageUI
 import ru.kulishov.sokratum.ui.elements.UpsElement
+import ru.kulishov.sokratum.ui.homeScreen.HomeScreenViewModel
 import sokratum.shared.generated.resources.Res
 import sokratum.shared.generated.resources.back
 import sokratum.shared.generated.resources.keyboard_arrow_right
@@ -223,35 +230,22 @@ fun ChatScreenUI(
                         }
                     }
                     if ((uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).e == null || (uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).e == "send") {
-                        val searchBarState = rememberSearchBarState()
-                        val textFieldState = rememberTextFieldState()
-                        val inputField = @Composable {
-                            SearchBarDefaults.InputField(
-                                searchBarState = searchBarState,
-                                textFieldState = textFieldState,
-                                onSearch = {
-                                },
-                                placeholder = { Text(stringResource(Res.string.new_message)) },
-                                leadingIcon = null,
-                                trailingIcon = {
-                                    if (textFieldState.text.isNotEmpty() && (uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).e != "send") {
-                                        IconButton(onClick = {
-                                            viewModel.request(textFieldState.text.toString())
-                                            textFieldState.clearText()
-                                        }) {
-                                            Icon(
-                                                painter = painterResource(Res.drawable.keyboard_arrow_right),
-                                                contentDescription = "send"
-                                            )
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                        SearchBar(
-                            state = searchBarState,
-                            inputField = inputField,
-                            modifier = Modifier.padding(bottom = 15.dp).fillMaxWidth()
+                        var query by remember { mutableStateOf("") }
+                        MessageBar(
+                            query = query,
+                            onQueryChange = { query=it },
+                            onSend = {
+                                    viewModel.request(query)
+                            },
+                            placeholder = stringResource(Res.string.new_message),
+                            leadingIcon = null,
+                            trailingIcon = {
+                                Icon(
+                                    painter = painterResource(Res.drawable.keyboard_arrow_right),
+                                    contentDescription = "send"
+                                )
+                            },
+                            modifier = Modifier.height(56.dp)
                         )
 
                     } else {

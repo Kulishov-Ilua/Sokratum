@@ -20,9 +20,14 @@ compose.desktop {
         mainClass = "ru.kulishov.sokratum.MainKt"
 
         nativeDistributions {
+            windows{
+                iconFile.set(project.file("src/main/sokratumn.ico"))
+
+            }
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "ru.kulishov.sokratum"
             packageVersion = "1.0.0"
+
         }
     }
 }

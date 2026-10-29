@@ -16,10 +16,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         AndroidFilePickerSetup.register(this)
         super.onCreate(savedInstanceState)
-        initKoin {
-            androidContext(this@MainActivity)
-            androidLogger()
-        }
         setContent {
             App()
         }

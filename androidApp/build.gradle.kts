@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar.Companion.shadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -54,3 +55,8 @@ android {
         compose = true
     }
 }
+
+//tasks.shadowJar {
+//    isZip64 = true
+//    minimize()
+//}

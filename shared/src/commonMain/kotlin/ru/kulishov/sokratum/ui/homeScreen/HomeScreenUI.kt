@@ -31,6 +31,10 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +49,7 @@ import ru.kulishov.sokratum.Platform
 import ru.kulishov.sokratum.domain.model.Space
 import ru.kulishov.sokratum.ui.DeviceData
 import ru.kulishov.sokratum.ui.elements.ChatCardUI
+import ru.kulishov.sokratum.ui.elements.MessageBar
 import ru.kulishov.sokratum.ui.elements.SpaceCardUI
 import ru.kulishov.sokratum.ui.elements.UpsElement
 import sokratum.shared.generated.resources.Res
@@ -107,6 +112,7 @@ fun HomeScreenUI(
         }
 
         is HomeScreenViewModel.HomeScreenUiState.Success -> {
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = if ((platform == null || platform is DeviceData.Platforms.Phone || platform is DeviceData.Platforms.WebPhone)) Arrangement.Center else Arrangement.Start
@@ -141,6 +147,7 @@ fun HomeScreenUI(
                                         }
                                     }
                                 }
+
                             )
                         }
 
@@ -152,7 +159,8 @@ fun HomeScreenUI(
                                 SearchBar(
                                     state = searchBarState,
                                     inputField = inputField,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+
                                 )
                             }
                             if (textFieldState.text.isEmpty()) {
@@ -257,41 +265,28 @@ fun HomeScreenUI(
                         }
                         if ((platform == null || platform is DeviceData.Platforms.Phone || platform is DeviceData.Platforms.WebPhone)) {
                             if ((uiState.value as HomeScreenViewModel.HomeScreenUiState.Success).status.isBlank()) {
-                                val searchBarState = rememberSearchBarState()
-                                val textFieldState = rememberTextFieldState()
-                                val inputField = @Composable {
-                                    SearchBarDefaults.InputField(
-                                        searchBarState = searchBarState,
-                                        textFieldState = textFieldState,
-                                        onSearch = {
-                                            //todo chat
-                                        },
-                                        placeholder = { Text(stringResource(Res.string.quick_chat)) },
-                                        leadingIcon = null,
-                                        trailingIcon = {
-                                            if (textFieldState.text.isNotEmpty()) {
-                                                IconButton(onClick = {
-                                                    onNavigate(
-                                                        HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat(
-                                                            textFieldState.text.toString()
-                                                        )
-                                                    )
-                                                }) {
-                                                    Icon(
-                                                        painter = painterResource(Res.drawable.keyboard_arrow_right),
-                                                        contentDescription = "send"
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    )
-                                }
-                                SearchBar(
-                                    state = searchBarState,
-                                    inputField = inputField,
-                                    modifier = Modifier.padding(bottom = 15.dp).fillMaxWidth()
-                                )
+                                var query by remember { mutableStateOf("") }
+                                MessageBar(
+                                    query = query,
+                                    onQueryChange = { query=it },
+                                    onSend = {
+                                        onNavigate(
+                                            HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat(
+                                                query
+                                            )
+                                        )
 
+                                    },
+                                    placeholder = stringResource(Res.string.quick_chat),
+                                    leadingIcon = null,
+                                    trailingIcon = {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.keyboard_arrow_right),
+                                            contentDescription = "send"
+                                        )
+                                    },
+                                    modifier = Modifier.height(56.dp)
+                                )
                             } else {
                                 Box(
                                     Modifier.fillMaxWidth(),
@@ -327,41 +322,28 @@ fun HomeScreenUI(
                         ) {
                             Text(stringResource(Res.string.discuss_something), style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
                             if ((uiState.value as HomeScreenViewModel.HomeScreenUiState.Success).status.isBlank()) {
-                                val searchBarState = rememberSearchBarState()
-                                val textFieldState = rememberTextFieldState()
-                                val inputField = @Composable {
-                                    SearchBarDefaults.InputField(
-                                        searchBarState = searchBarState,
-                                        textFieldState = textFieldState,
-                                        onSearch = {
+                                var query by remember { mutableStateOf("") }
+                                MessageBar(
+                                    query = query,
+                                    onQueryChange = { query=it },
+                                    onSend = {
+                                        onNavigate(
+                                            HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat(
+                                                query
+                                            )
+                                        )
 
-                                        },
-                                        placeholder = { Text(stringResource(Res.string.quick_chat)) },
-                                        leadingIcon = null,
-                                        trailingIcon = {
-                                            if (textFieldState.text.isNotEmpty()) {
-                                                IconButton(onClick = {
-                                                    onNavigate(
-                                                        HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat(
-                                                            textFieldState.text.toString()
-                                                        )
-                                                    )
-                                                }) {
-                                                    Icon(
-                                                        painter = painterResource(Res.drawable.keyboard_arrow_right),
-                                                        contentDescription = "send"
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    )
-                                }
-                                SearchBar(
-                                    state = searchBarState,
-                                    inputField = inputField,
-                                    modifier = Modifier.padding(bottom = 15.dp).fillMaxWidth()
+                                    },
+                                    placeholder = stringResource(Res.string.quick_chat),
+                                    leadingIcon = null,
+                                    trailingIcon = {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.keyboard_arrow_right),
+                                            contentDescription = "send"
+                                        )
+                                    },
+                                    modifier = Modifier.height(56.dp)
                                 )
-
                             } else {
                                 Box(
                                     Modifier.padding(bottom = 15.dp).fillMaxWidth(),
