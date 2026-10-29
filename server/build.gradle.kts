@@ -14,6 +14,12 @@ application {
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
+kotlin {
+    compilerOptions {
+        javaParameters = true
+    }
+}
+
 dependencies {
     implementation(libs.logback)
     implementation(libs.ktor.serverCore)

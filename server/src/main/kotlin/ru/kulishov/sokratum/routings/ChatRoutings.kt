@@ -1,6 +1,8 @@
 package ru.kulishov.sokratum.routings
 
 import dev.langchain4j.agentic.AgenticServices
+import dev.langchain4j.invocation.InvocationParameters
+import dev.langchain4j.memory.chat.MessageWindowChatMemory
 import dev.langchain4j.rag.query.Query
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -24,6 +26,7 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.v1.core.exposedLogger
 import ru.kulishov.sokratum.ai.AIModels
 import ru.kulishov.sokratum.ai.ExpertAgent
+import ru.kulishov.sokratum.ai.SearchTools
 import ru.kulishov.sokratum.ai.rag.RAG
 import ru.kulishov.sokratum.db.chat.Chat
 import ru.kulishov.sokratum.db.chat.ChatDao
@@ -112,20 +115,23 @@ fun Application.configureChatRoutings(
                 val findModel = AIModels.models[body.model]
                 val findChat = chatDao.getChat(body.chatId)
                 if (findModel != null && findChat != null) {
-                    val retriever = RAG.getRetriever(findChat.spaceId)
-
+                    //val retriever = RAG.getRetriever(findChat.spaceId)
                     var agent = AgenticServices
                         .agentBuilder(ExpertAgent::class.java)
                         .chatModel(findModel)
                         .outputKey("response")
-                        .systemMessage(if (findChat.systemPrompt.isNotBlank()) findChat.systemPrompt else "Ответь на вопрос пользователя")
-                        .contentRetriever(retriever)
+                        .systemMessage(if (findChat.systemPrompt.isNotBlank()) findChat.systemPrompt else "Ответь на вопрос пользователя, используй инструмент searchKnowledge для поиска информации")
+                        .tools(SearchTools(findChat.spaceId))
+                        .chatMemoryProvider { chatId ->
+                            MessageWindowChatMemory.withMaxMessages(20)
+                        }
+
+                        //.contentRetriever(retriever)
                         .build()
 
-                    exposedLogger.warn("Prompt to LLM: ${body.text}")
-                    exposedLogger.warn("Retriever context: ${retriever.retrieve(Query.from(body.text))}")
-                    val answer = agent.chat(body.text)
-                    exposedLogger.warn("LLM answer: $answer")
+                    val params = InvocationParameters.from(mapOf("spaceId" to findChat.spaceId))
+                    val answer = agent.chat(body.chatId,body.text)
+
 
                     //val answer = agent.chat(body.text)
                     if (answer != null) {
@@ -205,7 +211,9 @@ fun Application.configureChatRoutings(
                                             .systemMessage(if (findChat.systemPrompt.isNotBlank()) findChat.systemPrompt else "Ответь на вопрос пользователя")
                                             .contentRetriever(retriever)
                                             .build()
-                                        val answer = agent.chat(message.text)
+
+                                        val params = InvocationParameters.from(mapOf("spaceId" to findChat.spaceId))
+                                        val answer = agent.chat(findChat.id,message.text)
                                         if (answer != null) {
                                             val modelMessage = messageDao.addMessage(
                                                 Message(

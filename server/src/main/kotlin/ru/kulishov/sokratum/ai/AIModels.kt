@@ -34,6 +34,9 @@ object AIModels {
             ).timeout(Duration.ofSeconds(model.timeout))
             .logRequests(true)
             .logResponses(true)
+                .customParameters(mapOf(
+                    "chat_template_kwargs" to mapOf("enable_thinking" to true)
+                ))
                 .build()
         }
 //        models+="gemma4" to OpenAiChatModel.builder()

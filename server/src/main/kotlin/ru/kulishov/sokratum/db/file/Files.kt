@@ -9,7 +9,7 @@ import ru.kulishov.sokratum.db.space.Spaces
 
 object Files : Table() {
     val id = uuid("id")
-    val spaceId = integer("spaceId").references(Spaces.id, onDelete = ReferenceOption.NO_ACTION)
+    val spaceId = integer("spaceId").references(Spaces.id, onDelete = ReferenceOption.CASCADE)
     val name = varchar("name", 255)
     val size = long("size")
     val contentType = varchar("content_type", 128)
