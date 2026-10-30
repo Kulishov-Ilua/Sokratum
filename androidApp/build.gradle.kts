@@ -20,6 +20,7 @@ dependencies {
     debugImplementation(libs.compose.uiTooling)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+    implementation("androidx.core:core-splashscreen:1.0.0")
 }
 
 android {

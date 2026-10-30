@@ -62,7 +62,7 @@ fun App(
         onNavHostReady(navController)
     }
 
-    MaterialTheme {
+    SokratumTheme {
         Scaffold(
             content = { paddingValues ->
                 Box(Modifier.padding(paddingValues).padding(horizontal = 16.dp)) {
