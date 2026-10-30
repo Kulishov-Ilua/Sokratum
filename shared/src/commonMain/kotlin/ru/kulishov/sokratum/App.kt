@@ -1,6 +1,8 @@
 package ru.kulishov.sokratum
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -62,170 +64,221 @@ fun App(
         onNavHostReady(navController)
     }
 
-    SokratumTheme {
+    SokratumTheme() {
         Scaffold(
+
             content = { paddingValues ->
-                Box(Modifier.padding(paddingValues).padding(horizontal = 16.dp)) {
-                    NavHost(navController, startDestination = NavigationRoutes.AuthScreen) {
-                        composable<NavigationRoutes.AuthScreen> {
-                            AuthScreenUI(
-                                viewModel = koinViewModel<AuthScreenViewModel>(),
-                                authSuccess = { navController.navigate(NavigationRoutes.HomeScreen) }
-                            )
-                        }
-                        composable<NavigationRoutes.HomeScreen> {
-                            HomeScreenUI(
-                                platform=platform,
-                                viewModel = koinViewModel<HomeScreenViewModel>(),
-                                onNavigate = {
-                                    when (it) {
-                                        HomeScreenViewModel.HomeScreenNavigationRoutes.Auth -> {
-                                            KtorClient.unAuth()
-                                            navController.navigate(NavigationRoutes.AuthScreen)
-                                        }
+                Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+                    Box(Modifier.padding(paddingValues).padding(horizontal = 16.dp)) {
+                        NavHost(navController, startDestination = NavigationRoutes.AuthScreen) {
+                            composable<NavigationRoutes.AuthScreen> {
+                                AuthScreenUI(
+                                    viewModel = koinViewModel<AuthScreenViewModel>(),
+                                    authSuccess = { navController.navigate(NavigationRoutes.HomeScreen) }
+                                )
+                            }
+                            composable<NavigationRoutes.HomeScreen> {
+                                HomeScreenUI(
+                                    platform = platform,
+                                    viewModel = koinViewModel<HomeScreenViewModel>(),
+                                    onNavigate = {
+                                        when (it) {
+                                            HomeScreenViewModel.HomeScreenNavigationRoutes.Auth -> {
+                                                KtorClient.unAuth()
+                                                navController.navigate(NavigationRoutes.AuthScreen)
+                                            }
 
-                                        is HomeScreenViewModel.HomeScreenNavigationRoutes.Chat -> {
+                                            is HomeScreenViewModel.HomeScreenNavigationRoutes.Chat -> {
 
-                                            navController.navigate(NavigationRoutes.ChatScreen(
-                                                chatId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).chatID,
-                                                spaceId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).spaceId,
-                                                chatName =  (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).chatName,
-                                            ))
-                                        }
-                                        is HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat -> {
-                                            navController.navigate(NavigationRoutes.ChatScreen(
-                                                chatId = -1,
-                                                spaceId = 0,
-                                                chatName = "New chat",
-                                                message = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat).message
-                                            ))
-                                        }
-                                        HomeScreenViewModel.HomeScreenNavigationRoutes.Settings -> navController.navigate(
-                                            NavigationRoutes.SettingScreen
-                                        )
+                                                navController.navigate(
+                                                    NavigationRoutes.ChatScreen(
+                                                        chatId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).chatID,
+                                                        spaceId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).spaceId,
+                                                        chatName = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).chatName,
+                                                    )
+                                                )
+                                            }
 
-                                        is HomeScreenViewModel.HomeScreenNavigationRoutes.Space -> navController.navigate(
-                                            NavigationRoutes.SpaceScreen(
-                                                spaceId =   (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Space).spaceId,
-                                                spaceName = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Space).spaceName)
+                                            is HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat -> {
+                                                navController.navigate(
+                                                    NavigationRoutes.ChatScreen(
+                                                        chatId = -1,
+                                                        spaceId = 0,
+                                                        chatName = "New chat",
+                                                        message = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat).message
+                                                    )
+                                                )
+                                            }
+
+                                            HomeScreenViewModel.HomeScreenNavigationRoutes.Settings -> navController.navigate(
+                                                NavigationRoutes.SettingScreen
                                             )
-                                        is HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor -> {
-                                            navController.navigate(NavigationRoutes.SpaceRedactScreen(
-                                                    spaceId =   (it as HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor).space.id,
-                                                    spaceName = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor).space.name)
+
+                                            is HomeScreenViewModel.HomeScreenNavigationRoutes.Space -> navController.navigate(
+                                                NavigationRoutes.SpaceScreen(
+                                                    spaceId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Space).spaceId,
+                                                    spaceName = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Space).spaceName
+                                                )
                                             )
+
+                                            is HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor -> {
+                                                navController.navigate(
+                                                    NavigationRoutes.SpaceRedactScreen(
+                                                        spaceId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor).space.id,
+                                                        spaceName = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor).space.name
+                                                    )
+                                                )
+                                            }
                                         }
                                     }
-                                }
-                            )
-                        }
-                        composable<NavigationRoutes.SettingScreen> {
-                            SettingScreenUI(
-                                viewModel = koinViewModel<SettingScreenViewModel>(),
-                                onNavigate = {
+                                )
+                            }
+                            composable<NavigationRoutes.SettingScreen> {
+                                SettingScreenUI(
+                                    viewModel = koinViewModel<SettingScreenViewModel>(),
+                                    onNavigate = {
+                                        when (it) {
+                                            SettingScreenViewModel.SettingScreenNavigationRoutes.Back -> navController.navigate(
+                                                NavigationRoutes.HomeScreen
+                                            )
+
+                                            SettingScreenViewModel.SettingScreenNavigationRoutes.LogOut -> {
+                                                KtorClient.unAuth()
+                                                navController.navigate(NavigationRoutes.AuthScreen)
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+
+                            composable<NavigationRoutes.SpaceRedactScreen> { backStackEntry ->
+                                val space =
+                                    backStackEntry.toRoute<NavigationRoutes.SpaceRedactScreen>().spaceId
+                                val name =
+                                    backStackEntry.toRoute<NavigationRoutes.SpaceRedactScreen>().spaceName
+                                val viewModel = koinViewModel<RedactSpaceScreenViewModel>()
+                                viewModel.init(SpaceRedactTransfer(space, name))
+                                RedactSpaceUI(viewModel, {
                                     when (it) {
-                                        SettingScreenViewModel.SettingScreenNavigationRoutes.Back -> navController.navigate(
+                                        RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Home -> navController.navigate(
                                             NavigationRoutes.HomeScreen
                                         )
 
-                                        SettingScreenViewModel.SettingScreenNavigationRoutes.LogOut -> {
-                                            KtorClient.unAuth()
-                                            navController.navigate(NavigationRoutes.AuthScreen)
-                                        }
-                                    }
-                                }
-                            )
-                        }
-
-                        composable<NavigationRoutes.SpaceRedactScreen> { backStackEntry ->
-                            val space =
-                                backStackEntry.toRoute<NavigationRoutes.SpaceRedactScreen>().spaceId
-                            val name = backStackEntry.toRoute<NavigationRoutes.SpaceRedactScreen>().spaceName
-                            val viewModel = koinViewModel<RedactSpaceScreenViewModel>()
-                            viewModel.init(SpaceRedactTransfer(space,name))
-                            RedactSpaceUI(viewModel, {
-                                when (it) {
-                                    RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Home -> navController.navigate(
-                                        NavigationRoutes.HomeScreen)
-                                    is RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Space -> navController.navigate(
-                                        NavigationRoutes.SpaceScreen(
-                                            spaceId =   (it as RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Space).spaceId,
-                                            spaceName = (it as RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Space).spaceName)
+                                        is RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Space -> navController.navigate(
+                                            NavigationRoutes.SpaceScreen(
+                                                spaceId = (it as RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Space).spaceId,
+                                                spaceName = (it as RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Space).spaceName
+                                            )
                                         )
-                                }
-                            })
-                        }
-                        composable<NavigationRoutes.ChatRedactScreen> {backStackEntry ->
-                            val chatId =
-                                backStackEntry.toRoute<NavigationRoutes.ChatRedactScreen>().chatId
-                            val spaceId = backStackEntry.toRoute<NavigationRoutes.ChatRedactScreen>().spaceId
-                            RedactChatScreenUI(
-                                viewModel = koinViewModel<RedactChatScreenViewModel> {
-                                    parametersOf(chatId,spaceId)
-                                },
-                                onNavigate = {
-                                    when(it){
-                                        RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Back -> navController.navigate(
-                                            NavigationRoutes.HomeScreen)
-                                        is RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat -> navController.navigate(
-                                            NavigationRoutes.ChatScreen(
-                                                chatId = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).chatId,
-                                                spaceId = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).spaceId,
-                                                chatName = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).chatName,
-                                                message = ""
-                                            ))
                                     }
-                                }
-                            )
-                        }
-                        composable<NavigationRoutes.SpaceScreen> { backStackEntry ->
-                            val (spaceId, spaceName) = backStackEntry.toRoute<NavigationRoutes.SpaceScreen>()
-                            SpaceScreenUI(
-                                platform=platform,
-                                viewModel = koinViewModel<SpaceScreenViewModel>{
-                                    parametersOf(spaceId) },
-                                onNavigate = {
-                                    when(it){
-                                        SpaceScreenViewModel.SpaceScreenNavigationRoutes.Back -> navController.navigate(
-                                            NavigationRoutes.HomeScreen)
-                                        is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatRedact -> {
-                                            navController.navigate(NavigationRoutes.ChatRedactScreen(it.chatId,it.spaceId))
-                                        }
-                                        is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen -> navController.navigate(
-                                            NavigationRoutes.ChatScreen(
-                                                chatId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).chatID,
-                                                spaceId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).spaceId,
-                                                chatName = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).chatName,
-                                            ))
-                                        is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend -> navController.navigate(
-                                            NavigationRoutes.ChatScreen(
-                                                chatId = -1,
-                                                spaceId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend).spaceId,
-                                                chatName = "New chat",
-                                                message = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend).message
-                                            ))
-                                        is SpaceScreenViewModel.SpaceScreenNavigationRoutes.SpaceRedact -> navController.navigate(
-                                            NavigationRoutes.SpaceRedactScreen(spaceId,spaceName))
-                                    }
-                                }
-                            )
-                        }
-                        composable<NavigationRoutes.ChatScreen> {backStackEntry->
-                            val (chatId,spaceId, chatName, message) = backStackEntry.toRoute<NavigationRoutes.ChatScreen>()
-                            ChatScreenUI(koinViewModel<ChatScreenViewModel> { parametersOf(chatId,chatName, spaceId,message) }, {
-                                when (it) {
-                                    ChatScreenViewModel.ChatScreenNavigationRoutes.Back -> {
-                                        if(spaceId>=0){
-                                            navController.navigate(NavigationRoutes.SpaceScreen(spaceId,""))
-                                        }else{
-                                            navController.navigate(NavigationRoutes.HomeScreen)
+                                })
+                            }
+                            composable<NavigationRoutes.ChatRedactScreen> { backStackEntry ->
+                                val chatId =
+                                    backStackEntry.toRoute<NavigationRoutes.ChatRedactScreen>().chatId
+                                val spaceId =
+                                    backStackEntry.toRoute<NavigationRoutes.ChatRedactScreen>().spaceId
+                                RedactChatScreenUI(
+                                    viewModel = koinViewModel<RedactChatScreenViewModel> {
+                                        parametersOf(chatId, spaceId)
+                                    },
+                                    onNavigate = {
+                                        when (it) {
+                                            RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Back -> navController.navigate(
+                                                NavigationRoutes.HomeScreen
+                                            )
+
+                                            is RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat -> navController.navigate(
+                                                NavigationRoutes.ChatScreen(
+                                                    chatId = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).chatId,
+                                                    spaceId = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).spaceId,
+                                                    chatName = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).chatName,
+                                                    message = ""
+                                                )
+                                            )
                                         }
                                     }
-                                    is ChatScreenViewModel.ChatScreenNavigationRoutes.ChatSettings -> navController.navigate(
-                                        NavigationRoutes.ChatRedactScreen(chatId,spaceId)
+                                )
+                            }
+                            composable<NavigationRoutes.SpaceScreen> { backStackEntry ->
+                                val (spaceId, spaceName) = backStackEntry.toRoute<NavigationRoutes.SpaceScreen>()
+                                SpaceScreenUI(
+                                    platform = platform,
+                                    viewModel = koinViewModel<SpaceScreenViewModel> {
+                                        parametersOf(spaceId)
+                                    },
+                                    onNavigate = {
+                                        when (it) {
+                                            SpaceScreenViewModel.SpaceScreenNavigationRoutes.Back -> navController.navigate(
+                                                NavigationRoutes.HomeScreen
+                                            )
+
+                                            is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatRedact -> {
+                                                navController.navigate(
+                                                    NavigationRoutes.ChatRedactScreen(
+                                                        it.chatId,
+                                                        it.spaceId
+                                                    )
+                                                )
+                                            }
+
+                                            is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen -> navController.navigate(
+                                                NavigationRoutes.ChatScreen(
+                                                    chatId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).chatID,
+                                                    spaceId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).spaceId,
+                                                    chatName = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).chatName,
+                                                )
+                                            )
+
+                                            is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend -> navController.navigate(
+                                                NavigationRoutes.ChatScreen(
+                                                    chatId = -1,
+                                                    spaceId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend).spaceId,
+                                                    chatName = "New chat",
+                                                    message = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend).message
+                                                )
+                                            )
+
+                                            is SpaceScreenViewModel.SpaceScreenNavigationRoutes.SpaceRedact -> navController.navigate(
+                                                NavigationRoutes.SpaceRedactScreen(
+                                                    spaceId,
+                                                    spaceName
+                                                )
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                            composable<NavigationRoutes.ChatScreen> { backStackEntry ->
+                                val (chatId, spaceId, chatName, message) = backStackEntry.toRoute<NavigationRoutes.ChatScreen>()
+                                ChatScreenUI(koinViewModel<ChatScreenViewModel> {
+                                    parametersOf(
+                                        chatId,
+                                        chatName,
+                                        spaceId,
+                                        message
                                     )
-                                }
-                            })
+                                }, {
+                                    when (it) {
+                                        ChatScreenViewModel.ChatScreenNavigationRoutes.Back -> {
+                                            if (spaceId >= 0) {
+                                                navController.navigate(
+                                                    NavigationRoutes.SpaceScreen(
+                                                        spaceId,
+                                                        ""
+                                                    )
+                                                )
+                                            } else {
+                                                navController.navigate(NavigationRoutes.HomeScreen)
+                                            }
+                                        }
+
+                                        is ChatScreenViewModel.ChatScreenNavigationRoutes.ChatSettings -> navController.navigate(
+                                            NavigationRoutes.ChatRedactScreen(chatId, spaceId)
+                                        )
+                                    }
+                                })
+                            }
                         }
                     }
                 }

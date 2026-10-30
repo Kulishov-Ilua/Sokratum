@@ -31,6 +31,7 @@ class ModelRequestRepositoryImpl(): ModelRequestRepository {
                 setBody(SendMessageRequest(
                     chatId = message.chatId.toInt(),
                     model = message.model.name,
+                    temperature = message.temperature,
                     text = message.text
                 ))
             }

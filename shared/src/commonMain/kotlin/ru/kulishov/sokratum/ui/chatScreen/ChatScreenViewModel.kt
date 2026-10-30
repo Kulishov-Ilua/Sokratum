@@ -1,14 +1,12 @@
 package ru.kulishov.sokratum.ui.chatScreen
 
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -48,6 +46,10 @@ class ChatScreenViewModel(
     private val _uiState = MutableStateFlow<ChatScreenUiState>(ChatScreenUiState.Loading)
     val uiState: StateFlow<ChatScreenUiState> = _uiState.asStateFlow()
 
+
+    var digitTemperature = AIModels.temperature
+    var temperature by mutableStateOf(digitTemperature.toString())
+
     init {
         launch {
             getChatUseCase(chatId, spaceId, message.ifBlank { null })
@@ -55,32 +57,56 @@ class ChatScreenViewModel(
                 .collect { result ->
                     _uiState.update {
                         when (result) {
-                            is RefreshResult.Cached<Message>  -> ChatScreenUiState.Success(result.items)
-                            is RefreshResult.Fresh<Message>   -> ChatScreenUiState.Success(result.items)
-                            is RefreshResult.Offline<Message> -> ChatScreenUiState.Success(result.items, "offline")
-                            is RefreshResult.Error            -> ChatScreenUiState.Error("unknown error")
+                            is RefreshResult.Cached<Message> -> ChatScreenUiState.Success(result.items)
+                            is RefreshResult.Fresh<Message> -> ChatScreenUiState.Success(result.items)
+                            is RefreshResult.Offline<Message> -> ChatScreenUiState.Success(
+                                result.items,
+                                "offline"
+                            )
+
+                            is RefreshResult.Error -> ChatScreenUiState.Error("unknown error")
                         }
                     }
                 }
         }
     }
-    fun request(text: String){
+
+    fun setTemperature() {
+        AIModels.temperature = digitTemperature
+    }
+
+    fun request(text: String) {
         launch {
-            if(_uiState.value is ChatScreenUiState.Success){
-                _uiState.value= ChatScreenUiState.Success((_uiState.value as ChatScreenUiState.Success).items+ Message(
-                    id = -1,
-                    idChat = chatId.toInt(),
-                    isModel = false,
-                    text = text,
-                    sendTime = Clock.System.now().toLocalDateTime(TimeZone.UTC)
-                ), "send")
+            if (_uiState.value is ChatScreenUiState.Success) {
+                _uiState.value = ChatScreenUiState.Success(
+                    (_uiState.value as ChatScreenUiState.Success).items + Message(
+                        id = -1,
+                        idChat = chatId.toInt(),
+                        isModel = false,
+                        text = text,
+                        sendTime = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                    ), "send"
+                )
 
             }
-            val answer = sendMessageUseCase(SendMessageRequest(chatId.toInt(), AIModels.model.name, text))
-            if(answer!=null){
-                _uiState.value= ChatScreenUiState.Success(items =if(_uiState.value is ChatScreenUiState.Success) (_uiState.value as ChatScreenUiState.Success).items + answer else listOf(answer))
-            }else{
-                _uiState.value= ChatScreenUiState.Success(items =if(_uiState.value is ChatScreenUiState.Success) (_uiState.value as ChatScreenUiState.Success).items else emptyList(), e = "offline")
+
+            val answer = sendMessageUseCase(
+                SendMessageRequest(
+                    chatId.toInt(), AIModels.actualModel?.name?: AIModels.model.name,
+                    AIModels.temperature, text
+                )
+            )
+            if (answer != null) {
+                _uiState.value = ChatScreenUiState.Success(
+                    items = if (_uiState.value is ChatScreenUiState.Success) (_uiState.value as ChatScreenUiState.Success).items + answer else listOf(
+                        answer
+                    )
+                )
+            } else {
+                _uiState.value = ChatScreenUiState.Success(
+                    items = if (_uiState.value is ChatScreenUiState.Success) (_uiState.value as ChatScreenUiState.Success).items else emptyList(),
+                    e = "offline"
+                )
             }
         }
 

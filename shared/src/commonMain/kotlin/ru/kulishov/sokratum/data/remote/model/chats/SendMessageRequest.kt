@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class SendMessageRequest(
     val chatId:Int,
     val model:String,
+    val temperature: Double,
     val text:String
 )

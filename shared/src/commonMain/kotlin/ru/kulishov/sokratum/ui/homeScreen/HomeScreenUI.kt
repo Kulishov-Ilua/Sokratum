@@ -27,8 +27,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -160,7 +163,11 @@ fun HomeScreenUI(
                                     state = searchBarState,
                                     inputField = inputField,
                                     modifier = Modifier.fillMaxWidth(),
-
+                                    colors = SearchBarColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                        dividerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                        inputFieldColors = TextFieldDefaults.colors()
+                                    )
                                 )
                             }
                             if (textFieldState.text.isEmpty()) {

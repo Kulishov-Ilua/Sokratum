@@ -277,6 +277,7 @@ class ChatRepositoryImpl(
                 val messageResponse = sendMessage(SendMessageRequest(
                     chatId = newChatId.toInt(),
                     model = AIModels.model.name,
+                    temperature = AIModels.temperature,
                     text = message
                 ))
                 if(messageResponse!=null){

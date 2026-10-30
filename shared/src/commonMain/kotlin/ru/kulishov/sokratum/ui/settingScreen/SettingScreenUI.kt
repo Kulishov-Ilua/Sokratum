@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -188,9 +189,13 @@ fun SettingScreenUI(
                     val deviceFind = devices.find { it.login == KtorClient.username }
                     if (deviceFind != null) {
                         Card(
-                            Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(
-                                MaterialTheme.colorScheme.surfaceContainer
-                            )
+                            colors = CardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -266,6 +271,8 @@ fun SettingScreenUI(
                                         )
                                     },
                                     colors = TextFieldDefaults.colors().copy(
+                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                                         focusedIndicatorColor = Color.Transparent,
                                         unfocusedIndicatorColor = Color.Transparent,
                                         disabledIndicatorColor = Color.Transparent,

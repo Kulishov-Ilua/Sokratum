@@ -98,7 +98,7 @@ fun Application.configureChatRoutings(
             }
 
             get("/getModels") {
-                call.respond(HttpStatusCode.OK, AIModels.models.keys)
+                call.respond(HttpStatusCode.OK, AIModels.aiModels.map { it.name })
             }
 
             post("/sendMessage") {
@@ -112,7 +112,7 @@ fun Application.configureChatRoutings(
                         sendTime = LocalDateTime.now().toKotlinLocalDateTime()
                     )
                 )
-                val findModel = AIModels.models[body.model]
+                val findModel = AIModels.getAiModel(body.model, body.temperature)
                 val findChat = chatDao.getChat(body.chatId)
                 if (findModel != null && findChat != null) {
                     //val retriever = RAG.getRetriever(findChat.spaceId)
@@ -158,9 +158,9 @@ fun Application.configureChatRoutings(
             }
             post("/request") {
                 val body = call.receive<String>()
-                val models = AIModels.models.values
+                val models = AIModels.aiModels
                 if (models.isNotEmpty() && models.first() != null) {
-                    val answer = models.first()?.chat(body) ?: ""
+                    val answer = AIModels.getAiModel(models.first().name,0.6)?.chat(body) ?: ""
                     if (answer.isNotBlank()) {
                         call.respond(HttpStatusCode.OK, answer)
                     } else call.respond(HttpStatusCode.InternalServerError)
@@ -199,10 +199,11 @@ fun Application.configureChatRoutings(
                                         runCatching { session.send(broadcast) }
                                     }
 
-                                    val findModel = AIModels.models[message.model]
+                                    val findModel = AIModels.getAiModel(message.model, message.temperature)
                                     val findChat = chatDao.getChat(chatId)
                                     if (findModel != null && findChat != null) {
                                         val retriever = RAG.getRetriever(findChat.spaceId)
+
 
                                         var agent = AgenticServices
                                             .agentBuilder(ExpertAgent::class.java)

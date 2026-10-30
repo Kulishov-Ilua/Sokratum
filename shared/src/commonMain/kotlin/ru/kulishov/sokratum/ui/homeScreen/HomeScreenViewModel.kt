@@ -29,9 +29,9 @@ class HomeScreenViewModel(
 
     init{
         launch {
-            AIModels.modelList=getModelsUseCase().map { Model(
-                id = -1,
-                name = it,
+            AIModels.modelList=getModelsUseCase().mapIndexed { index, string -> Model(
+                id = index,
+                name = string,
                 url = "",
                 key = "",
                 timeout = 0

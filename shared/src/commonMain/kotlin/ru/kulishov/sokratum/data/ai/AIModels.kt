@@ -1,15 +1,20 @@
 package ru.kulishov.sokratum.data.ai
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import ru.kulishov.sokratum.domain.model.Model
 
 
 object AIModels {
-    private val _models = mutableListOf<Model>()
+    private var _models by mutableStateOf<List<Model>>(emptyList())
+
+    var temperature = 0.6
 
     var modelList: List<Model>
         get() = _models
         set(models:List<Model>){
-            _models+=models
+            _models=models
         }
 
     var model: Model
@@ -19,10 +24,10 @@ object AIModels {
                 it.name == value.name && it.url == value.url
             }
             if (!exists) {
-                _models.add(value)
+                _models+=value
             }
         }
-    private var _actualModel: Model? = null
+    private var _actualModel by mutableStateOf<Model?>(null)
 
     var actualModel: Model?
         get() = _actualModel ?: _models.firstOrNull()

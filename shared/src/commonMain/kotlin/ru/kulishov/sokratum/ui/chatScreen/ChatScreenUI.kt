@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -27,9 +28,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,19 +51,28 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import ru.kulishov.markweave.repository.MDParse
+import ru.kulishov.sokratum.data.ai.AIModels
 import ru.kulishov.sokratum.ui.DeviceData
 import ru.kulishov.sokratum.ui.elements.MessageBar
 import ru.kulishov.sokratum.ui.elements.MessageUI
+import ru.kulishov.sokratum.ui.elements.TextFieldCustom
 import ru.kulishov.sokratum.ui.elements.UpsElement
 import ru.kulishov.sokratum.ui.homeScreen.HomeScreenViewModel
 import sokratum.shared.generated.resources.Res
+import sokratum.shared.generated.resources.are_you_sure
 import sokratum.shared.generated.resources.back
+import sokratum.shared.generated.resources.cancel
+import sokratum.shared.generated.resources.delete
+import sokratum.shared.generated.resources.delete_assert
 import sokratum.shared.generated.resources.keyboard_arrow_right
 import sokratum.shared.generated.resources.new_chat
 import sokratum.shared.generated.resources.new_message
 import sokratum.shared.generated.resources.no_internet_connection
 import sokratum.shared.generated.resources.quick_chat
+import sokratum.shared.generated.resources.save
 import sokratum.shared.generated.resources.settings
+import sokratum.shared.generated.resources.space_name
+import sokratum.shared.generated.resources.temperature
 import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
@@ -107,6 +119,7 @@ fun ChatScreenUI(
         }
 
         is ChatScreenViewModel.ChatScreenUiState.Success -> {
+            var modelSettingWindowState by remember { mutableStateOf(false) }
             Column(
                modifier = Modifier.padding(top=15.dp).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -240,7 +253,13 @@ fun ChatScreenUI(
                                 query=""
                             },
                             placeholder = stringResource(Res.string.new_message),
-                            leadingIcon = null,
+                            leadingIcon = {
+                                IconButton(
+                                    onClick = {modelSettingWindowState=true}
+                                ){
+                                    Icon(painterResource(Res.drawable.settings), contentDescription = "Model settings")
+                                }
+                            },
                             trailingIcon = {
                                 Icon(
                                     painter = painterResource(Res.drawable.keyboard_arrow_right),
@@ -274,6 +293,66 @@ fun ChatScreenUI(
                     }
                 }
             }
+            if(modelSettingWindowState){
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    AlertDialog(
+                        dismissButton = null,
+                        onDismissRequest = {},
+                        title = {
+                            Text(
+                                stringResource(Res.string.are_you_sure),
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        },
+                        text = {
+                            Column(
+                               horizontalAlignment = Alignment.CenterHorizontally,
+                                //verticalArrangement = Arrangement.spacedBy()
+                            ) {
+                                TextFieldCustom(
+                                    value = viewModel.temperature,
+                                    onValueChange = {it ->
+                                        viewModel.temperature=it
+                                        it.toDoubleOrNull()?.let { viewModel.digitTemperature=it }
+                                    },
+                                    label = {Text(
+                                        stringResource(Res.string.temperature),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )}
+                                )
+                                for(model in AIModels.modelList){
+                                    Column(
+                                    ){
+                                        Row(Modifier.height(56.dp), verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                model.name,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            RadioButton(
+                                                selected = AIModels.actualModel!=null && AIModels.actualModel!!.id==model.id,
+                                                onClick = { AIModels.actualModel=model}
+                                            )
+                                        }
+                                        Box(Modifier.fillMaxWidth().height(1.dp).background(
+                                            MaterialTheme.colorScheme.onSurface))
+                                    }
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                viewModel.setTemperature()
+                                modelSettingWindowState=false
+                            }) {
+                                Text(stringResource(Res.string.save))
+                            }
+
+                        }
+                    )
+                }
+            }
+
         }
     }
 
