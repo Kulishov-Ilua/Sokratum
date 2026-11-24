@@ -15,6 +15,8 @@ object Chats : Table() {
     val name = varchar("name", 255)
     val systemPrompt = varchar("system_prompt", 10000)
     var lastOpen = datetime("last_open")
+    val debateEnabled = bool("debate_enabled").default(false)
+    val debateMaxRounds = integer("debate_max_rounds").default(3)
 
     override val primaryKey = PrimaryKey(id)
 }
@@ -25,7 +27,9 @@ data class Chat(
     val spaceId: Int,
     val name: String,
     val systemPrompt: String,
-    val lastOpen: LocalDateTime
+    val lastOpen: LocalDateTime,
+    val debateEnabled: Boolean = false,
+    val debateMaxRounds: Int = 3
 )
 
 @Serializable

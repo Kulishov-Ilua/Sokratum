@@ -22,7 +22,9 @@ class ChatDao {
         spaceId = row[Chats.spaceId],
         name = row[Chats.name],
         systemPrompt = row[Chats.systemPrompt],
-        lastOpen = row[Chats.lastOpen].toKotlinLocalDateTime()
+        lastOpen = row[Chats.lastOpen].toKotlinLocalDateTime(),
+        debateEnabled = row[Chats.debateEnabled],
+        debateMaxRounds = row[Chats.debateMaxRounds]
     )
 
     fun rowToMessage(row: ResultRow) = Message(
@@ -30,7 +32,8 @@ class ChatDao {
         idChat = row[Messages.idChat],
         isModel = row[Messages.isModel],
         text = row[Messages.text],
-        sendTime = row[Messages.sendTime].toKotlinLocalDateTime()
+        sendTime = row[Messages.sendTime].toKotlinLocalDateTime(),
+        author = row[Messages.author]
     )
 
     suspend fun getLastChats(): List<Chat> = query {
@@ -75,6 +78,8 @@ class ChatDao {
             it[Chats.spaceId] = chat.spaceId
             it[Chats.systemPrompt] = chat.systemPrompt
             it[Chats.lastOpen] = LocalDateTime.now()
+            it[Chats.debateEnabled] = chat.debateEnabled
+            it[Chats.debateMaxRounds] = chat.debateMaxRounds
         }.resultedValues?.map { rowToChat(it) }?.firstOrNull() ?: return@query null
         return@query chat
     }
@@ -84,6 +89,8 @@ class ChatDao {
             it[Chats.name] = chat.name
             it[Chats.spaceId] = chat.spaceId
             it[Chats.systemPrompt] = chat.systemPrompt
+            it[Chats.debateEnabled] = chat.debateEnabled
+            it[Chats.debateMaxRounds] = chat.debateMaxRounds
         }.let {
             Chats.selectAll().where { Chats.id eq chat.id }.map { rowToChat(it) }.singleOrNull()
         }

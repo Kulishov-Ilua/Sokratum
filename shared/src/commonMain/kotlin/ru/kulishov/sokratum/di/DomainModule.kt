@@ -1,12 +1,17 @@
 package ru.kulishov.sokratum.di
 
 import org.koin.dsl.module
+import ru.kulishov.sokratum.data.remote.repository.AgentRepositoryImpl
 import ru.kulishov.sokratum.data.remote.repository.AuthRepositoryImpl
 import ru.kulishov.sokratum.data.remote.repository.ChatRepositoryImpl
 import ru.kulishov.sokratum.data.remote.repository.SpaceRepositoryImpl
+import ru.kulishov.sokratum.domain.repository.AgentRepository
 import ru.kulishov.sokratum.domain.repository.AuthRepository
 import ru.kulishov.sokratum.domain.repository.ChatRepository
 import ru.kulishov.sokratum.domain.repository.SpaceRepository
+import ru.kulishov.sokratum.domain.usecase.agent.AddAgentUseCase
+import ru.kulishov.sokratum.domain.usecase.agent.DeleteAgentUseCase
+import ru.kulishov.sokratum.domain.usecase.agent.GetAgentsUseCase
 import ru.kulishov.sokratum.domain.usecase.auth.AuthUseCase
 import ru.kulishov.sokratum.domain.usecase.auth.GetDeviceDataUseCase
 import ru.kulishov.sokratum.domain.usecase.auth.GetKeyUseCase
@@ -35,6 +40,7 @@ val domainModule = module {
     single<AuthRepository> { AuthRepositoryImpl() }
     single<SpaceRepository> { SpaceRepositoryImpl(get(), get()) }
     single<ChatRepository> { ChatRepositoryImpl(get(),get()) }
+    single<AgentRepository> { AgentRepositoryImpl() }
 
     factory { AuthUseCase(get()) }
     factory { RegistrationUseCase(get()) }
@@ -58,4 +64,7 @@ val domainModule = module {
     factory { SendMessageUseCase(get()) }
     factory { GetModelsUseCase(get()) }
     factory { UpdateMessagesUseCase(get()) }
+    factory { GetAgentsUseCase(get()) }
+    factory { AddAgentUseCase(get()) }
+    factory { DeleteAgentUseCase(get()) }
 }

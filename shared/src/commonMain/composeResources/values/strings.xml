@@ -68,5 +68,12 @@ For cloud services, the key is issued when you register on the provider's websit
     <string name="discuss_something">It’s time\nto discuss something!</string>
     <string name="new_message">New message</string>
     <string name="temperature">Temperature</string>
+    <string name="debate_mode">Debate mode</string>
+    <string name="debate_max_rounds">Max debate rounds</string>
+    <string name="agents">AI characters</string>
+    <string name="agent_name">Character name</string>
+    <string name="agent_prompt">Character system prompt</string>
+    <string name="add_agent">Add character</string>
+    <string name="agents_hint">Add at least 2 characters for the debate</string>
 </resources>
 

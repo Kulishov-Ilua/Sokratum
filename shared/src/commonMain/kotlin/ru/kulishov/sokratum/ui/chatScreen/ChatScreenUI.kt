@@ -205,6 +205,14 @@ fun ChatScreenUI(
                     ) {
                         items(messages.value) { message ->
                             if (message.isModel) {
+                                if (message.author != null) {
+                                    Text(
+                                        message.author,
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    )
+                                }
                                 val layout = MDParse.mdParser(message.text, MaterialTheme.typography.bodyMedium,
                                     MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.surfaceContainer)
                                 for(x in layout){

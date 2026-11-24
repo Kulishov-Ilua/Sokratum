@@ -9,5 +9,7 @@ data class Chat(
     val spaceId: Long,
     val name: String,
     val systemPrompt: String,
-    val lastOpen: LocalDateTime
+    val lastOpen: LocalDateTime,
+    val debateEnabled: Boolean = false,
+    val debateMaxRounds: Int = 3
 )

@@ -12,6 +12,7 @@ object Messages : Table() {
     val id = long("id").autoIncrement()
     val idChat = integer("id_chat").references(Chats.id, onDelete = ReferenceOption.CASCADE)
     val isModel = bool("is_model")
+    val author = varchar("author", 120).nullable()
     val text = varchar("text", 50000)
     val sendTime = datetime("send_time")
 
@@ -24,7 +25,8 @@ data class Message(
     val idChat: Int,
     val isModel: Boolean,
     val text: String,
-    val sendTime: LocalDateTime
+    val sendTime: LocalDateTime,
+    val author: String? = null
 )
 
 @Serializable

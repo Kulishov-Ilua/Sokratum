@@ -18,7 +18,7 @@ import ru.kulishov.sokratum.data.local.data.entity.SpaceEntity
     entities = [ModelEntity::class,
         SpaceEntity::class,
         ChatEntity::class,
-        MessageEntity::class], version = 1
+        MessageEntity::class], version = 2
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {

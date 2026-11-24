@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -37,6 +39,11 @@ import ru.kulishov.sokratum.ui.elements.TextFieldCustom
 import ru.kulishov.sokratum.ui.elements.UpsElement
 import ru.kulishov.sokratum.ui.redactSpaceScreen.RedactSpaceScreenViewModel
 import sokratum.shared.generated.resources.Res
+import sokratum.shared.generated.resources.add_agent
+import sokratum.shared.generated.resources.agent_name
+import sokratum.shared.generated.resources.agent_prompt
+import sokratum.shared.generated.resources.agents
+import sokratum.shared.generated.resources.agents_hint
 import sokratum.shared.generated.resources.are_you_sure
 import sokratum.shared.generated.resources.back
 import sokratum.shared.generated.resources.cancel
@@ -44,6 +51,8 @@ import sokratum.shared.generated.resources.chat_name
 import sokratum.shared.generated.resources.create
 import sokratum.shared.generated.resources.creation_of_chat
 import sokratum.shared.generated.resources.creation_of_space
+import sokratum.shared.generated.resources.debate_max_rounds
+import sokratum.shared.generated.resources.debate_mode
 import sokratum.shared.generated.resources.delete
 import sokratum.shared.generated.resources.delete_assert
 import sokratum.shared.generated.resources.redaction_of_chat
@@ -100,6 +109,7 @@ fun RedactChatScreenUI(
 
         RedactChatScreenViewModel.RedactChatScreenUiState.Success -> {
             var deleteDialogState by remember { mutableStateOf(false) }
+            var agentDialogState by remember { mutableStateOf(false) }
             Column(
                 Modifier.padding(top = 15.dp).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -164,6 +174,72 @@ fun RedactChatScreenUI(
                             },
                             modifier = Modifier.heightIn(min = 200.dp).fillMaxWidth()
                         )
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                stringResource(Res.string.debate_mode),
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Switch(
+                                checked = viewModel.debateEnabled,
+                                onCheckedChange = { viewModel.debateEnabled = it }
+                            )
+                        }
+
+                        if (viewModel.debateEnabled) {
+                            TextFieldCustom(
+                                value = viewModel.debateMaxRounds,
+                                onValueChange = { viewModel.debateMaxRounds = it },
+                                label = {
+                                    Text(
+                                        stringResource(Res.string.debate_max_rounds),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            )
+                        }
+
+                        Text(
+                            stringResource(Res.string.agents),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        viewModel.agents.forEach { agent ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(agent.name, style = MaterialTheme.typography.titleSmall)
+                                    Text(
+                                        agent.systemPrompt,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                IconButton(onClick = { viewModel.deleteAgent(agent) }) {
+                                    Icon(
+                                        painterResource(Res.drawable.delete),
+                                        contentDescription = "delete agent",
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                        }
+                        if (viewModel.chatId >= 0) {
+                            if (viewModel.agents.size < 2) {
+                                Text(
+                                    stringResource(Res.string.agents_hint),
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                )
+                            }
+                            Button(
+                                onClick = { agentDialogState = true },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(stringResource(Res.string.add_agent))
+                            }
+                        }
                     }
                     Column(
                         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -185,6 +261,62 @@ fun RedactChatScreenUI(
                         }
                     }
 
+                }
+            }
+            if (agentDialogState) {
+                var agentName by remember { mutableStateOf("") }
+                var agentPrompt by remember { mutableStateOf("") }
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    AlertDialog(
+                        onDismissRequest = { agentDialogState = false },
+                        title = {
+                            Text(
+                                stringResource(Res.string.add_agent),
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        },
+                        text = {
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                TextFieldCustom(
+                                    value = agentName,
+                                    onValueChange = { agentName = it },
+                                    label = {
+                                        Text(
+                                            stringResource(Res.string.agent_name),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                )
+                                TextFieldCustom(
+                                    value = agentPrompt,
+                                    onValueChange = { agentPrompt = it },
+                                    label = {
+                                        Text(
+                                            stringResource(Res.string.agent_prompt),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    },
+                                    modifier = Modifier.heightIn(min = 120.dp).fillMaxWidth()
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.addAgent(agentName, agentPrompt)
+                                    agentDialogState = false
+                                },
+                                enabled = agentName.isNotBlank()
+                            ) {
+                                Text(stringResource(Res.string.add_agent))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { agentDialogState = false }) {
+                                Text(stringResource(Res.string.cancel))
+                            }
+                        },
+                    )
                 }
             }
             if (deleteDialogState) {

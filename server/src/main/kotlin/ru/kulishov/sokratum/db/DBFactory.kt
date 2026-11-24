@@ -10,6 +10,8 @@ import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertIgnore
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import ru.kulishov.sokratum.db.agent.AgentDao
+import ru.kulishov.sokratum.db.agent.Agents
 import ru.kulishov.sokratum.db.chat.ChatDao
 import ru.kulishov.sokratum.db.chat.Chats
 import ru.kulishov.sokratum.db.file.FileDao
@@ -50,6 +52,9 @@ object DBFactory {
             SchemaUtils.create(Spaces)
             SchemaUtils.create(Messages)
             SchemaUtils.create(Files)
+            SchemaUtils.create(Agents)
+            // Докидываем новые колонки в существующие таблицы
+            SchemaUtils.createMissingTablesAndColumns(Chats, Messages)
             Spaces.insertIgnore {
                 it[id]=0
                 it[name]="Main"
@@ -66,6 +71,8 @@ object DBFactory {
     val spaceDao = SpaceDao()
 
     val fileDao = FileDao()
+
+    val agentDao = AgentDao()
 }
 
 suspend fun <T> query(block: () -> T): T = withContext(Dispatchers.IO) {

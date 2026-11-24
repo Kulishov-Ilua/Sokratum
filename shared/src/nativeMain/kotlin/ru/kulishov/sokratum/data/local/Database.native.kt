@@ -36,5 +36,6 @@ fun getRoomDatabase(
 ): AppDatabase {
     return getDatabaseBuilder()
         .setDriver(driver)
+        .fallbackToDestructiveMigration(dropAllTables = true)
         .build()
 }

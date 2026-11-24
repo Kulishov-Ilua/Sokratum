@@ -23,5 +23,6 @@ fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<AppDatabase> {
 ): AppDatabase {
     return getDatabaseBuilder(context)
         .setDriver(driver)
+        .fallbackToDestructiveMigration(dropAllTables = true)
         .build()
 }

@@ -19,7 +19,8 @@ class MessageDao {
         idChat = row[Messages.idChat],
         isModel = row[Messages.isModel],
         text = row[Messages.text],
-        sendTime = row[Messages.sendTime].toKotlinLocalDateTime()
+        sendTime = row[Messages.sendTime].toKotlinLocalDateTime(),
+        author = row[Messages.author]
     )
 
     suspend fun addMessage(message: Message): Message? = query {
@@ -28,6 +29,7 @@ class MessageDao {
             it[Messages.isModel] = message.isModel
             it[Messages.text] = message.text
             it[Messages.sendTime] = LocalDateTime.now()
+            it[Messages.author] = message.author
         }.resultedValues?.map { rowToMessage(it) }?.firstOrNull() ?: return@query null
 
         return@query insert

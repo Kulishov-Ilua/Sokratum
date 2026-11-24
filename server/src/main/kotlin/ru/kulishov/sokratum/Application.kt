@@ -18,6 +18,7 @@ import io.ktor.server.websocket.timeout
 import ru.kulishov.sokratum.ai.AIModels
 import ru.kulishov.sokratum.ai.rag.FileStorrage
 import ru.kulishov.sokratum.db.DBFactory
+import ru.kulishov.sokratum.db.DBFactory.agentDao
 import ru.kulishov.sokratum.db.DBFactory.chatDao
 import ru.kulishov.sokratum.db.DBFactory.fileDao
 import ru.kulishov.sokratum.db.DBFactory.messageDao
@@ -76,7 +77,7 @@ fun Application.module() {
 
     configureSecurity(environment)
     configureAuthRouting(userDao)
-    configureChatRoutings(chatDao, messageDao)
+    configureChatRoutings(chatDao, messageDao, agentDao)
     configureSpaceRouting(spaceDao,fileDao)
     configureFileRoutings(fileDao)
 

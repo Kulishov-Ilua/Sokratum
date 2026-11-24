@@ -13,7 +13,8 @@ object MessageMapper {
         idChat = entity.idChat.toInt(),
         isModel = entity.isModel,
         text = entity.text,
-        sendTime = Instant.fromEpochSeconds(entity.sendTime).toLocalDateTime(TimeZone.UTC)
+        sendTime = Instant.fromEpochSeconds(entity.sendTime).toLocalDateTime(TimeZone.UTC),
+        author = entity.author
     )
 
     fun toEntity(domain: Message): MessageEntity = MessageEntity(
@@ -21,6 +22,7 @@ object MessageMapper {
         idChat = domain.idChat.toLong(),
         isModel = domain.isModel,
         text = domain.text,
-        sendTime = domain.sendTime.toInstant(TimeZone.UTC).epochSeconds
+        sendTime = domain.sendTime.toInstant(TimeZone.UTC).epochSeconds,
+        author = domain.author
     )
 }

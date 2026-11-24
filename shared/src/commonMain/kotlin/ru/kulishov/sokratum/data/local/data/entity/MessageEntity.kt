@@ -9,5 +9,6 @@ data class MessageEntity(
     val idChat: Long,
     val isModel: Boolean,
     val text: String,
-    val sendTime: Long
+    val sendTime: Long,
+    val author: String? = null
 )

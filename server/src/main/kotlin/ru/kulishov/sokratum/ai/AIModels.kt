@@ -9,7 +9,7 @@ object AIModels {
 
     var aiModels = listOf<AIModel>()
 
-    fun getAiModel(name:String, temperature: Double): OpenAiChatModel? {
+    fun getAiModel(name:String, temperature: Double, enableThinking: Boolean = true): OpenAiChatModel? {
         var ret: OpenAiChatModel? = null
         if(env!=null){
             val model = aiModels.find { it.name == name }
@@ -23,7 +23,7 @@ object AIModels {
                     .logRequests(true)
                     .logResponses(true)
                     .customParameters(mapOf(
-                        "chat_template_kwargs" to mapOf("enable_thinking" to true)
+                        "chat_template_kwargs" to mapOf("enable_thinking" to enableThinking)
                     ))
                     .build()
             }

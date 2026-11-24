@@ -9,5 +9,7 @@ data class ChatEntity(
     val idSpace: Long,
     val name: String,
     val systemPrompt: String,
-    val lastOpen: Long
+    val lastOpen: Long,
+    val debateEnabled: Boolean = false,
+    val debateMaxRounds: Int = 3
 )

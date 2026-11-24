@@ -69,4 +69,11 @@
     <string name="discuss_something">Самое время\nчто-нибудь обсудить!</string>
     <string name="new_message">Новое сообщение</string>
     <string name="temperature">Температура</string>
+    <string name="debate_mode">Режим спора</string>
+    <string name="debate_max_rounds">Лимит кругов спора</string>
+    <string name="agents">ИИ-персонажи</string>
+    <string name="agent_name">Имя персонажа</string>
+    <string name="agent_prompt">Системный промпт персонажа</string>
+    <string name="add_agent">Добавить персонажа</string>
+    <string name="agents_hint">Для спора нужно минимум 2 персонажа</string>
 </resources>

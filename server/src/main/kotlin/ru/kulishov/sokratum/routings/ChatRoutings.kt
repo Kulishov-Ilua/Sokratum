@@ -24,8 +24,11 @@ import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.v1.core.exposedLogger
 import ru.kulishov.sokratum.ai.AIModels
+import ru.kulishov.sokratum.ai.DebateEngine
 import ru.kulishov.sokratum.ai.ExpertAgent
 import ru.kulishov.sokratum.ai.SearchTools
+import ru.kulishov.sokratum.db.agent.Agent
+import ru.kulishov.sokratum.db.agent.AgentDao
 import ru.kulishov.sokratum.db.chat.Chat
 import ru.kulishov.sokratum.db.chat.ChatDao
 import ru.kulishov.sokratum.db.message.Message
@@ -37,8 +40,10 @@ private val wsJson = Json { ignoreUnknownKeys = true }
 
 fun Application.configureChatRoutings(
     chatDao: ChatDao,
-    messageDao: MessageDao
+    messageDao: MessageDao,
+    agentDao: AgentDao
 ) {
+    val debateEngine = DebateEngine(messageDao)
     routing {
         authenticate("auth-jwt") {
             get("/getLastChats") {
@@ -164,6 +169,28 @@ fun Application.configureChatRoutings(
                             send(Frame.Text(wsJson.encodeToString(saved)))
                         }
 
+                        val chat = withContext(Dispatchers.IO) { chatDao.getChat(chatId) }
+                        val agents = withContext(Dispatchers.IO) { agentDao.getAgents(chatId) }
+                        if (chat != null && chat.debateEnabled && agents.size >= 2) {
+                            // Режим спора: вместо одиночного ответа персонажи дискутируют,
+                            // каждая реплика сразу уходит в сокет
+                            try {
+                                debateEngine.runDebate(
+                                    chat = chat,
+                                    agents = agents,
+                                    userText = request.text,
+                                    model = request.model,
+                                    temperature = request.temperature,
+                                    onReplica = { replica ->
+                                        send(Frame.Text(wsJson.encodeToString(replica)))
+                                    }
+                                )
+                            } catch (e: Exception) {
+                                exposedLogger.error("Ошибка спора в чате $chatId: ${e.message}")
+                            }
+                            continue
+                        }
+
                         val answer = withContext(Dispatchers.IO) {
                             try {
                                 generateAnswer(chatDao, request)
@@ -203,6 +230,28 @@ fun Application.configureChatRoutings(
                 } else call.respond(HttpStatusCode.NotFound)
             }
 
+
+            get("/getAgents/{chatId}") {
+                val chatId = call.parameters["chatId"]?.toIntOrNull()
+                if (chatId != null) {
+                    call.respond(HttpStatusCode.OK, agentDao.getAgents(chatId))
+                } else call.respond(HttpStatusCode.BadRequest)
+            }
+
+            post("/addAgent") {
+                val body = call.receive<Agent>()
+                val respond = agentDao.addAgent(body)
+                if (respond != null) call.respond(HttpStatusCode.OK, respond)
+                else call.respond(HttpStatusCode.Conflict)
+            }
+
+            post("/deleteAgent/{agentId}") {
+                val agentId = call.parameters["agentId"]?.toIntOrNull()
+                if (agentId != null) {
+                    agentDao.deleteAgent(agentId)
+                    call.respond(HttpStatusCode.OK)
+                } else call.respond(HttpStatusCode.BadRequest)
+            }
 
             get("/loadMessage/{chatId}/{cursor}") {
                 var chatId = call.parameters["chatId"]?.toIntOrNull()

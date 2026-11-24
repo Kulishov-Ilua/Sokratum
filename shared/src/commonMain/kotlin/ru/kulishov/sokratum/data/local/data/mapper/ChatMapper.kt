@@ -19,7 +19,9 @@ object ChatMapper {
         spaceId = entity.idSpace,
         name = entity.name,
         systemPrompt = entity.systemPrompt,
-        lastOpen = Instant.fromEpochSeconds(entity.lastOpen).toLocalDateTime(TimeZone.UTC)
+        lastOpen = Instant.fromEpochSeconds(entity.lastOpen).toLocalDateTime(TimeZone.UTC),
+        debateEnabled = entity.debateEnabled,
+        debateMaxRounds = entity.debateMaxRounds
     )
 
     fun toEntity(domain: Chat): ChatEntity = ChatEntity(
@@ -27,7 +29,9 @@ object ChatMapper {
         idSpace = domain.spaceId,
         name = domain.name,
         systemPrompt = domain.systemPrompt,
-        lastOpen = domain.lastOpen.toInstant(TimeZone.UTC).epochSeconds
+        lastOpen = domain.lastOpen.toInstant(TimeZone.UTC).epochSeconds,
+        debateEnabled = domain.debateEnabled,
+        debateMaxRounds = domain.debateMaxRounds
     )
 
 //    fun toChatAndMessages(entity: ChatEntity, messages: List<MessageEntity>): ChatAndMessages =

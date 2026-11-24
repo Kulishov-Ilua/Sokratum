@@ -9,5 +9,6 @@ data class Message(
     val idChat: Int,
     val isModel: Boolean,
     val text: String,
-    val sendTime: LocalDateTime
+    val sendTime: LocalDateTime,
+    val author: String? = null
 )
