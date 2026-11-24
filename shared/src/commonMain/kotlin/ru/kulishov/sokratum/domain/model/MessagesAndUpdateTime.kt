@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MessagesAndUpdateTime(
     val messages: List<Message>,
-    val updateTime: LocalDateTime
+    val updateTime: Long
 )

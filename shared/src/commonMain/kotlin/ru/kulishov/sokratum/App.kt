@@ -64,6 +64,14 @@ fun App(
         onNavHostReady(navController)
     }
 
+
+    fun navigateToAuth() {
+        KtorClient.unAuth()
+        navController.navigate(NavigationRoutes.AuthScreen) {
+            popUpTo(0) { inclusive = true }
+        }
+    }
+
     SokratumTheme() {
         Scaffold(
 
@@ -84,17 +92,15 @@ fun App(
                                     onNavigate = {
                                         when (it) {
                                             HomeScreenViewModel.HomeScreenNavigationRoutes.Auth -> {
-                                                KtorClient.unAuth()
-                                                navController.navigate(NavigationRoutes.AuthScreen)
+                                                navigateToAuth()
                                             }
 
                                             is HomeScreenViewModel.HomeScreenNavigationRoutes.Chat -> {
-
                                                 navController.navigate(
                                                     NavigationRoutes.ChatScreen(
-                                                        chatId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).chatID,
-                                                        spaceId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).spaceId,
-                                                        chatName = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Chat).chatName,
+                                                        chatId = it.chatID,
+                                                        spaceId = it.spaceId,
+                                                        chatName = it.chatName,
                                                     )
                                                 )
                                             }
@@ -105,7 +111,7 @@ fun App(
                                                         chatId = -1,
                                                         spaceId = 0,
                                                         chatName = "New chat",
-                                                        message = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.NewChat).message
+                                                        message = it.message
                                                     )
                                                 )
                                             }
@@ -116,16 +122,16 @@ fun App(
 
                                             is HomeScreenViewModel.HomeScreenNavigationRoutes.Space -> navController.navigate(
                                                 NavigationRoutes.SpaceScreen(
-                                                    spaceId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Space).spaceId,
-                                                    spaceName = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.Space).spaceName
+                                                    spaceId = it.spaceId,
+                                                    spaceName = it.spaceName
                                                 )
                                             )
 
                                             is HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor -> {
                                                 navController.navigate(
                                                     NavigationRoutes.SpaceRedactScreen(
-                                                        spaceId = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor).space.id,
-                                                        spaceName = (it as HomeScreenViewModel.HomeScreenNavigationRoutes.SpaceRedactor).space.name
+                                                        spaceId = it.space.id,
+                                                        spaceName = it.space.name
                                                     )
                                                 )
                                             }
@@ -138,13 +144,10 @@ fun App(
                                     viewModel = koinViewModel<SettingScreenViewModel>(),
                                     onNavigate = {
                                         when (it) {
-                                            SettingScreenViewModel.SettingScreenNavigationRoutes.Back -> navController.navigate(
-                                                NavigationRoutes.HomeScreen
-                                            )
+                                            SettingScreenViewModel.SettingScreenNavigationRoutes.Back -> navController.popBackStack()
 
                                             SettingScreenViewModel.SettingScreenNavigationRoutes.LogOut -> {
-                                                KtorClient.unAuth()
-                                                navController.navigate(NavigationRoutes.AuthScreen)
+                                                navigateToAuth()
                                             }
                                         }
                                     }
@@ -160,14 +163,12 @@ fun App(
                                 viewModel.init(SpaceRedactTransfer(space, name))
                                 RedactSpaceUI(viewModel, {
                                     when (it) {
-                                        RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Home -> navController.navigate(
-                                            NavigationRoutes.HomeScreen
-                                        )
+                                        RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Home -> navController.popBackStack()
 
                                         is RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Space -> navController.navigate(
                                             NavigationRoutes.SpaceScreen(
-                                                spaceId = (it as RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Space).spaceId,
-                                                spaceName = (it as RedactSpaceScreenViewModel.RedactSpaceNavigationRoutes.Space).spaceName
+                                                spaceId = it.spaceId,
+                                                spaceName = it.spaceName
                                             )
                                         )
                                     }
@@ -184,15 +185,13 @@ fun App(
                                     },
                                     onNavigate = {
                                         when (it) {
-                                            RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Back -> navController.navigate(
-                                                NavigationRoutes.HomeScreen
-                                            )
+                                            RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Back -> navController.popBackStack()
 
                                             is RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat -> navController.navigate(
                                                 NavigationRoutes.ChatScreen(
-                                                    chatId = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).chatId,
-                                                    spaceId = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).spaceId,
-                                                    chatName = (it as RedactChatScreenViewModel.RedactChatScreenNavigationRoutes.Chat).chatName,
+                                                    chatId = it.chatId,
+                                                    spaceId = it.spaceId,
+                                                    chatName = it.chatName,
                                                     message = ""
                                                 )
                                             )
@@ -209,9 +208,7 @@ fun App(
                                     },
                                     onNavigate = {
                                         when (it) {
-                                            SpaceScreenViewModel.SpaceScreenNavigationRoutes.Back -> navController.navigate(
-                                                NavigationRoutes.HomeScreen
-                                            )
+                                            SpaceScreenViewModel.SpaceScreenNavigationRoutes.Back -> navController.popBackStack()
 
                                             is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatRedact -> {
                                                 navController.navigate(
@@ -224,18 +221,18 @@ fun App(
 
                                             is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen -> navController.navigate(
                                                 NavigationRoutes.ChatScreen(
-                                                    chatId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).chatID,
-                                                    spaceId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).spaceId,
-                                                    chatName = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatScreen).chatName,
+                                                    chatId = it.chatID,
+                                                    spaceId = it.spaceId,
+                                                    chatName = it.chatName,
                                                 )
                                             )
 
                                             is SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend -> navController.navigate(
                                                 NavigationRoutes.ChatScreen(
                                                     chatId = -1,
-                                                    spaceId = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend).spaceId,
+                                                    spaceId = it.spaceId,
                                                     chatName = "New chat",
-                                                    message = (it as SpaceScreenViewModel.SpaceScreenNavigationRoutes.ChatWithMessageSend).message
+                                                    message = it.message
                                                 )
                                             )
 
@@ -261,16 +258,7 @@ fun App(
                                 }, {
                                     when (it) {
                                         ChatScreenViewModel.ChatScreenNavigationRoutes.Back -> {
-                                            if (spaceId >= 0) {
-                                                navController.navigate(
-                                                    NavigationRoutes.SpaceScreen(
-                                                        spaceId,
-                                                        ""
-                                                    )
-                                                )
-                                            } else {
-                                                navController.navigate(NavigationRoutes.HomeScreen)
-                                            }
+                                            navController.popBackStack()
                                         }
 
                                         is ChatScreenViewModel.ChatScreenNavigationRoutes.ChatSettings -> navController.navigate(

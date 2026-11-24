@@ -12,11 +12,23 @@ import kotlin.uuid.Uuid.Companion.random
 object JWTConfig {
     private var SECRET = ""
     private var algorithm: Algorithm? = null
-    private const val EXPIRES_IN = 3600000
+    const val EXPIRES_IN = 3600000L
 
     private var RegistrationPassword: String? = null
 
-    var lastUpdateKey = 0
+    var lastUpdateKeyMillis: Long = 0
+        private set
+
+    fun canRegenerateKey(cooldownMillis: Long = 15_000): Boolean =
+        System.currentTimeMillis() - lastUpdateKeyMillis >= cooldownMillis
+
+    fun markKeyRegenerated() {
+        lastUpdateKeyMillis = System.currentTimeMillis()
+    }
+
+    internal fun resetKeyCooldown() {
+        lastUpdateKeyMillis = 0
+    }
 
     fun generateRegistrationKey() {
         RegistrationPassword =
@@ -42,7 +54,6 @@ object JWTConfig {
     fun init(environment: ApplicationEnvironment) {
         SECRET = environment.config.property("jwt_secret").getString()
         algorithm = Algorithm.HMAC256(SECRET)
-        LocalDateTime.now().second
     }
 
     fun generateToken(login: String, role: String, userId: Int): String {

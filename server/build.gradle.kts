@@ -31,9 +31,6 @@ dependencies {
     implementation(libs.langchain4j.local.ai)
     implementation(libs.langchain4j.easy.rag)
     implementation(libs.langchain4j.agentic)
-    implementation(libs.langchain4j.vertex.ai.gemini)
-    implementation(libs.langchain4j.google.ai.gemini)
-    implementation(libs.langchain4j.gigachat)
 
     implementation("io.ktor:ktor-server-cors:${ktor}")
 
@@ -41,16 +38,13 @@ dependencies {
     implementation(libs.ktor.server.websocket)
 
     implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.server.sessions)
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.client.apache)
     implementation(libs.ktor.server.auth.jwt)
     implementation(libs.postgresql)
-    implementation(libs.h2)
     implementation(libs.ktor.server.config.yaml)
 
     implementation(libs.exposed.core)
-    implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.java.time)
     implementation(libs.exposed.crypt)

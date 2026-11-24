@@ -14,6 +14,7 @@ import ru.kulishov.sokratum.db.message.MessagesAndUpdateTime
 import ru.kulishov.sokratum.db.query
 import ru.kulishov.sokratum.db.space.Spaces
 import java.time.LocalDateTime
+import kotlin.time.Clock
 
 class ChatDao {
     fun rowToChat(row: ResultRow) = Chat(
@@ -62,7 +63,7 @@ class ChatDao {
                 lastOpen = messages.lastOrNull()?.id ?:-1,
                 messages = MessagesAndUpdateTime(
                     messages,
-                    LocalDateTime.now().toKotlinLocalDateTime()
+                    Clock.System.now().epochSeconds
                 )
             )
         } else return@query null

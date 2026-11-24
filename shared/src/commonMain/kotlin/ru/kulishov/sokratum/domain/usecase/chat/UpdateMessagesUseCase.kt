@@ -2,11 +2,12 @@ package ru.kulishov.sokratum.domain.usecase.chat
 
 import kotlinx.coroutines.flow.Flow
 import ru.kulishov.sokratum.domain.model.Message
+import ru.kulishov.sokratum.domain.model.MessagesAndUpdateTime
 import ru.kulishov.sokratum.domain.repository.ChatRepository
 
 class UpdateMessagesUseCase(
     private val repository: ChatRepository
 ) {
-    suspend operator fun invoke(chatId: Long, updateTime: Long): List<Message> =
+    suspend operator fun invoke(chatId: Long, updateTime: Long): MessagesAndUpdateTime? =
         repository.updateMessages(chatId, updateTime)
 }

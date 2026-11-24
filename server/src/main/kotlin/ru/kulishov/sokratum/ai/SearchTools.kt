@@ -15,7 +15,7 @@ class SearchTools(
         @P("Поисковый запрос") query: String,
     ): String {
         exposedLogger.info("SearchKnowledge")
-        return runBlocking() {
+        return runBlocking {
             val retriever = RAG.getRetriever(spaceId)
             val contents = retriever.retrieve(Query.from(query))
             exposedLogger.info(contents.toString())

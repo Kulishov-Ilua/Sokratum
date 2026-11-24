@@ -30,5 +30,5 @@ data class Message(
 @Serializable
 data class MessagesAndUpdateTime(
     val messages: List<Message>,
-    val updateTime: LocalDateTime
+    val updateTime: Long
 )

@@ -4,8 +4,10 @@ import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import ru.kulishov.sokratum.db.query
 import ru.kulishov.sokratum.dto.auth.DeviceDataResponse
+import ru.kulishov.sokratum.security.PasswordHasher
 
 class UserDao {
     fun rowToUser(row: ResultRow) = User(
@@ -17,13 +19,20 @@ class UserDao {
     )
 
     suspend fun authUser(login: String, password: String): User? = query {
-        Users
-            .selectAll()
-            .where { (Users.login eq login) }
-            .map {
-                rowToUser(it)
+        val user = Users.selectAll().where { Users.login eq login }.map { rowToUser(it) }
+            .singleOrNull() ?: return@query null
+        when {
+            PasswordHasher.isHashed(user.password) ->
+                if (PasswordHasher.verify(password, user.password)) user else null
+            user.password == password -> {
+                // Миграция устаревших паролей, хранившихся в открытом виде
+                Users.update({ Users.id eq user.id }) {
+                    it[Users.password] = PasswordHasher.hash(user.password)
+                }
+                user
             }
-            .firstOrNull { it.password == password }
+            else -> null
+        }
     }
 
     suspend fun createUser(device: String, role: String, login: String, password: String): Boolean =
@@ -31,11 +40,11 @@ class UserDao {
             val userFind = Users.selectAll().where { Users.login eq login }.map { rowToUser(it) }
                 .singleOrNull()
             if (userFind == null) {
-                val statement = Users.insert {
+                Users.insert {
                     it[Users.role] = role
                     it[Users.login] = login
-                    it[Users.password] = password
-                    it[Users.device]=device
+                    it[Users.password] = PasswordHasher.hash(password)
+                    it[Users.device] = device
                 }
                 return@query true
             } else {

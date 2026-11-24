@@ -20,6 +20,7 @@ import ru.kulishov.sokratum.domain.usecase.chat.GetLastChatsUseCase
 import ru.kulishov.sokratum.domain.usecase.chat.MessagesUseCase
 import ru.kulishov.sokratum.domain.usecase.chat.SendMessageUseCase
 import ru.kulishov.sokratum.domain.usecase.chat.UpdateChatUseCase
+import ru.kulishov.sokratum.domain.usecase.chat.UpdateMessagesUseCase
 import ru.kulishov.sokratum.domain.usecase.space.AddFileUseCase
 import ru.kulishov.sokratum.domain.usecase.space.AddSpaceUseCase
 import ru.kulishov.sokratum.domain.usecase.space.DeleteFileUseCase
@@ -30,7 +31,7 @@ import ru.kulishov.sokratum.domain.usecase.space.GetSpacesDataUseCase
 import ru.kulishov.sokratum.domain.usecase.space.UpdateSpaceUseCase
 
 
-val domainModlule = module {
+val domainModule = module {
     single<AuthRepository> { AuthRepositoryImpl() }
     single<SpaceRepository> { SpaceRepositoryImpl(get(), get()) }
     single<ChatRepository> { ChatRepositoryImpl(get(),get()) }
@@ -56,4 +57,5 @@ val domainModlule = module {
     factory { GetChatUseCase(get()) }
     factory { SendMessageUseCase(get()) }
     factory { GetModelsUseCase(get()) }
+    factory { UpdateMessagesUseCase(get()) }
 }

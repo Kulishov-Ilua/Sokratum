@@ -83,6 +83,8 @@ fun ChatScreenUI(
 ) {
     val uiState =
         viewModel.uiState.collectAsStateWithLifecycle(ChatScreenViewModel.ChatScreenUiState.Loading)
+    val messages =
+        viewModel.messages.collectAsStateWithLifecycle(emptyList())
     val isPhone =
         ((DeviceData.actualPlatform == null || DeviceData.actualPlatform is DeviceData.Platforms.Phone || DeviceData.actualPlatform is DeviceData.Platforms.WebPhone))
     when (uiState.value) {
@@ -177,11 +179,9 @@ fun ChatScreenUI(
 
                     }
                     val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
-                    val messages =
-                        (uiState.value as ChatScreenViewModel.ChatScreenUiState.Success).items
-                    var currentDate = messages.firstOrNull()?.sendTime ?: now
+                    var currentDate = messages.value.firstOrNull()?.sendTime ?: now
                     val listState =
-                        rememberLazyListState(if (messages.isNotEmpty()) messages.size - 1 else 0)
+                        rememberLazyListState(if (messages.value.isNotEmpty()) messages.value.size - 1 else 0)
 
 
                     LazyColumn(
@@ -189,7 +189,7 @@ fun ChatScreenUI(
                         modifier = Modifier.weight(1f),
                         state = listState
                     ) {
-                        items(messages) { message ->
+                        items(messages.value) { message ->
                             if (message.isModel) {
                                 val layout = MDParse.mdParser(message.text, MaterialTheme.typography.bodyMedium,
                                     MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.surfaceContainer)

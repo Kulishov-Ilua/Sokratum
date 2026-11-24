@@ -5,6 +5,7 @@ import ru.kulishov.sokratum.data.remote.model.chats.SendMessageRequest
 import ru.kulishov.sokratum.domain.model.Chat
 import ru.kulishov.sokratum.domain.model.ChatAndMessages
 import ru.kulishov.sokratum.domain.model.Message
+import ru.kulishov.sokratum.domain.model.MessagesAndUpdateTime
 import ru.kulishov.sokratum.domain.model.RefreshResult
 
 interface ChatRepository {
@@ -16,7 +17,7 @@ interface ChatRepository {
      fun getChat(chatId: Long, spaceId:Long, message:String?): Flow<RefreshResult<Message>>
     suspend fun getChatById(chatId: Long): Chat?
     suspend fun sendMessage(message: SendMessageRequest): Message?
-    suspend fun updateMessages(chatId: Long, updateTime: Long): List<Message>
+    suspend fun updateMessages(chatId: Long, updateTime: Long): MessagesAndUpdateTime?
 
     fun messages(chatId: Int,spaceId:Long, afterMessageId: Long?, outgoing: Flow<Message>): Flow<RefreshResult<Message>>
     suspend fun send(message: Message)

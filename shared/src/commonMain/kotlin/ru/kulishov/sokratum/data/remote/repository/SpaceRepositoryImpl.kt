@@ -9,203 +9,76 @@ import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import io.ktor.util.logging.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.retryWhen
 import kotlinx.io.IOException
 import ru.kulishov.sokratum.data.local.dao.ChatDao
 import ru.kulishov.sokratum.data.local.dao.SpaceDao
 import ru.kulishov.sokratum.data.local.data.mapper.ChatMapper
 import ru.kulishov.sokratum.data.local.data.mapper.SpaceMapper
+import ru.kulishov.sokratum.data.remote.ApiClient
 import ru.kulishov.sokratum.data.remote.KtorClient.BASE_URL
 import ru.kulishov.sokratum.data.remote.KtorClient.JWT_KEY
 import ru.kulishov.sokratum.data.remote.KtorClient.client
-import ru.kulishov.sokratum.data.remote.model.chats.SendMessageRequest
+import ru.kulishov.sokratum.data.remote.authHeader
+import ru.kulishov.sokratum.data.remote.fetchWithCache
 import ru.kulishov.sokratum.data.remote.model.space.SelectedFile
 import ru.kulishov.sokratum.data.remote.model.space.SpaceAndFiles
-import ru.kulishov.sokratum.domain.model.Message
 import ru.kulishov.sokratum.domain.model.RefreshError
 import ru.kulishov.sokratum.domain.model.RefreshResult
 import ru.kulishov.sokratum.domain.model.Space
 import ru.kulishov.sokratum.domain.model.SpaceAndChats
-import ru.kulishov.sokratum.domain.model.SpaceWithoutStorage
 import ru.kulishov.sokratum.domain.repository.SpaceRepository
-import kotlin.collections.map
 
 class SpaceRepositoryImpl(
     private val spaceDao: SpaceDao,
     private val chatDao: ChatDao
-): SpaceRepository {
-    override  fun getSpacesData():Flow<RefreshResult<Space>> = flow {
+) : SpaceRepository {
+
+    override fun getSpacesData(): Flow<RefreshResult<Space>> = flow {
         val cached = spaceDao.getSpaces()
         if (cached.isNotEmpty()) {
             emit(RefreshResult.Cached(cached.map { SpaceMapper.toDomain(it) }))
         }
-        try{
-            val response = client.get("${BASE_URL}/getSpaces"){
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
-                }
-            }
-            val body:List<Space> = response.body()
+        val cachedDomain = cached.map { SpaceMapper.toDomain(it) }
+        fetchWithCache(cachedDomain) {
+            val body: List<Space> = client.get("${BASE_URL}/getSpaces") {
+                headers { append(HttpHeaders.Authorization, "Bearer $JWT_KEY") }
+            }.body()
             spaceDao.replaceAll(body.map { SpaceMapper.toEntity(it) })
-            emit(RefreshResult.Fresh(body))
-        }
-        catch (e: CancellationException){
-            throw e
-        }
-        catch (e: IOException){
-             if(cached.isNotEmpty()){
-                 emit(RefreshResult.Offline(cached.map { SpaceMapper.toDomain(it) }, RefreshError.Network))
-             }else{
-                 emit(RefreshResult.Error)
-             }
-        }
-        catch (e: ClientRequestException){
-            val error = if (e.response.status == HttpStatusCode.Unauthorized) {
-                RefreshError.Unauthorized
-            } else {
-                RefreshError.Server(e.response.status.value)
-            }
-            if(cached.isNotEmpty()){
-                emit(RefreshResult.Offline(cached.map { SpaceMapper.toDomain(it) }, error))
-            }else{
-                emit(RefreshResult.Error)
-            }
-        }
-        catch (e: ServerResponseException){
-            if(cached.isNotEmpty()){
-                emit(RefreshResult.Offline(cached.map { SpaceMapper.toDomain(it) }, RefreshError.Server(e.response.status.value)))
-            }else{
-                emit(RefreshResult.Error)
-            }
-        }
-        catch (e: Exception){
-            e.printStackTrace()
-            emit(RefreshResult.Error)
+            body
         }
     }
-
 
     override fun getSpaceAndChats(spaceId: Long): Flow<RefreshResult<SpaceAndChats>> = flow {
         val cached = spaceDao.getSpaceAndChats(spaceId)
-        if (cached!=null) {
+        if (cached != null) {
             emit(RefreshResult.Cached(listOf(cached)))
         }
-        try {
-
-            val response = client.get("${BASE_URL}/getSpaceAndChats/$spaceId") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
-                }
-            }
-            val body: SpaceAndChats = response.body()
+        val cachedList = listOfNotNull(cached)
+        fetchWithCache(cachedList) {
+            val body: SpaceAndChats = client.get("${BASE_URL}/getSpaceAndChats/$spaceId") {
+                headers { append(HttpHeaders.Authorization, "Bearer $JWT_KEY") }
+            }.body()
             chatDao.replaceAll(body.chats.map { ChatMapper.toEntity(it) })
-            emit(RefreshResult.Fresh(listOf(body)))
-        }catch (e: CancellationException){
-            throw e
-        }
-        catch (e: IOException){
-            if(cached!=null){
-                emit(RefreshResult.Offline(listOf(cached), RefreshError.Network))
-            }else{
-                emit(RefreshResult.Error)
-            }
-        }
-        catch (e: ClientRequestException){
-            val error = if (e.response.status == HttpStatusCode.Unauthorized) {
-                RefreshError.Unauthorized
-            } else {
-                RefreshError.Server(e.response.status.value)
-            }
-            if(cached!=null){
-                emit(RefreshResult.Offline(listOf(cached), error))
-            }else{
-                emit(RefreshResult.Error)
-            }
-        }
-        catch (e: ServerResponseException){
-            if(cached!=null){
-                emit(RefreshResult.Offline(listOf(cached), RefreshError.Server(e.response.status.value)))
-            }else{
-                emit(RefreshResult.Error)
-            }
-        }
-        catch (e: Exception){
-            e.printStackTrace()
-            emit(RefreshResult.Error)
+            listOf(body)
         }
     }
 
-    override suspend fun getSpaceAndFiles(spaceId: Long): SpaceAndFiles? {
-        var ret: SpaceAndFiles? = null
-        try {
-            val response = client.get("${BASE_URL}/getSpaceAndFiles/$spaceId") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
-                }
-            }
-            if (response.status == HttpStatusCode.OK) {
-                ret = response.body()
-            }
-        }catch (e: ClientRequestException) {
-            println("HTTP error: ${e.response.status}")
-            val errorBody = e.response.bodyAsText()
-            println("Error body: $errorBody")
-        } catch (e: Exception) {
-            println("Error: ${e.message}")
-        }
-        return ret
-    }
+    override suspend fun getSpaceAndFiles(spaceId: Long): SpaceAndFiles? =
+        ApiClient.get("/getSpaceAndFiles/$spaceId")
 
-    override suspend fun deleteFile(
-        spaceId: Long,
-        fileId: String
-    ): SpaceAndFiles? {
-        var ret: SpaceAndFiles? = null
-        try {
-            val response = client.post("${BASE_URL}/deleteFile/$spaceId/$fileId") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
-                }
-            }
-            if (response.status == HttpStatusCode.OK) {
-                ret = response.body()
-            }
-        }catch (e: ClientRequestException) {
-            println("HTTP error: ${e.response.status}")
-            val errorBody = e.response.bodyAsText()
-            println("Error body: $errorBody")
-        } catch (e: Exception) {
-            println("Error: ${e.message}")
-        }
-        return ret
-    }
+    override suspend fun deleteFile(spaceId: Long, fileId: String): SpaceAndFiles? =
+        ApiClient.post("/deleteFile/$spaceId/$fileId")
 
-    override suspend fun addFile(
-        spaceId: Int,
-        file: SelectedFile
-    ): SpaceAndFiles? {
-        var ret: SpaceAndFiles? = null
-        try {
-            val response = client.post("${BASE_URL}/addFile/$spaceId") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
-                }
+    override suspend fun addFile(spaceId: Int, file: SelectedFile): SpaceAndFiles? =
+        ApiClient.safeCall {
+            client.post("${BASE_URL}/addFile/$spaceId") {
+                authHeader()
                 setBody(
                     MultiPartFormDataContent(
                         formData {
@@ -214,95 +87,22 @@ class SpaceRepositoryImpl(
                                 value = file.bytes,
                                 headers = Headers.build {
                                     append(HttpHeaders.ContentType, file.type)
-                                    append(
-                                        HttpHeaders.ContentDisposition,
-                                        "filename=\"${file.name}\""
-                                    )
+                                    append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
                                 }
                             )
                         }
                     )
                 )
             }
-            if (response.status == HttpStatusCode.OK) {
-                ret = response.body()
-            }
-        }catch (e: ClientRequestException) {
-            println("HTTP error: ${e.response.status}")
-            val errorBody = e.response.bodyAsText()
-            println("Error body: $errorBody")
-        } catch (e: Exception) {
-            println("Error: ${e.message}")
         }
-        return ret
-    }
 
-    override suspend fun addSpace(space: Space): Space? {
-        var ret: Space? = null
-        try {
-            val response = client.post("${BASE_URL}/addSpace") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
-                }
-                setBody(space)
+    override suspend fun addSpace(space: Space): Space? =
+        ApiClient.post("/addSpace", space)
 
-            }
-            if (response.status == HttpStatusCode.OK) {
-                ret = response.body()
-            }
-        }catch (e: ClientRequestException) {
-            println("HTTP error: ${e.response.status}")
-            val errorBody = e.response.bodyAsText()
-            println("Error body: $errorBody")
-        } catch (e: Exception) {
-            println("Error: ${e.message}")
-        }
-        return ret
-    }
-
-    override suspend fun updateSpace(space: Space): Space? {
-        var ret: Space? = null
-        try {
-            val response = client.post("${BASE_URL}/updateSpace") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
-                }
-                setBody(space)
-
-            }
-            if (response.status == HttpStatusCode.OK) {
-                ret = response.body()
-            }
-        }catch (e: ClientRequestException) {
-            println("HTTP error: ${e.response.status}")
-            val errorBody = e.response.bodyAsText()
-            println("Error body: $errorBody")
-        } catch (e: Exception) {
-            println("Error: ${e.message}")
-        }
-        return ret
-    }
+    override suspend fun updateSpace(space: Space): Space? =
+        ApiClient.post("/updateSpace", space)
 
     override suspend fun deleteSpace(space: Space) {
-        try {
-            val response = client.post("${BASE_URL}/deleteSpace") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $JWT_KEY")
-                }
-                setBody(space)
-
-            }
-            if (response.status == HttpStatusCode.OK) {
-            }
-        }catch (e: ClientRequestException) {
-            println("HTTP error: ${e.response.status}")
-            val errorBody = e.response.bodyAsText()
-            println("Error body: $errorBody")
-        } catch (e: Exception) {
-            println("Error: ${e.message}")
-        }
+        ApiClient.postRaw("/deleteSpace", space)
     }
 }

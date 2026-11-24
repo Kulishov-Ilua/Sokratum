@@ -27,3 +27,4 @@ actual fun getKtorClient(): HttpClient = HttpClient(Darwin){
 
 
 }
+actual val apiBaseUrl: String = "http://192.168.10.196:3000"

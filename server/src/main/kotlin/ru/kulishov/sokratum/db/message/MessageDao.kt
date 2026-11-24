@@ -11,6 +11,7 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import ru.kulishov.sokratum.db.query
 import java.time.LocalDateTime
+import kotlin.time.Clock
 
 class MessageDao {
     fun rowToMessage(row: ResultRow) = Message(
@@ -39,6 +40,6 @@ class MessageDao {
         val messages = Messages.selectAll()
             .where { (Messages.idChat eq chatId) and (Messages.id greater lastMessage) }
             .map { rowToMessage(it) }
-        return@query MessagesAndUpdateTime(messages, LocalDateTime.now().toKotlinLocalDateTime())
+        return@query MessagesAndUpdateTime(messages, Clock.System.now().epochSeconds)
     }
 }

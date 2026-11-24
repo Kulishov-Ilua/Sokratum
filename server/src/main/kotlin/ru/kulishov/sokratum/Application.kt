@@ -37,7 +37,10 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     install(CORS) {
-        anyHost()
+        val hosts = this@module.environment.config.propertyOrNull("allowed_hosts")?.getString()
+            ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+            ?: listOf("localhost:3000", "localhost:8080", "127.0.0.1:3000", "127.0.0.1:8080")
+        hosts.forEach { allowHost(it, schemes = listOf("http", "https")) }
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Post)
         allowMethod(HttpMethod.Get)
@@ -63,7 +66,7 @@ fun Application.module() {
         })
         pingPeriod = 20.seconds
         timeout = 15.seconds
-        maxFrameSize = Long.MAX_VALUE
+        maxFrameSize = 16L * 1024 * 1024
         masking = false
     }
     JWTConfig.init(environment)
