@@ -35,6 +35,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -183,6 +185,18 @@ fun ChatScreenUI(
                     val listState =
                         rememberLazyListState(if (messages.value.isNotEmpty()) messages.value.size - 1 else 0)
 
+                    val isNearBottom by remember {
+                        derivedStateOf {
+                            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                            val total = listState.layoutInfo.totalItemsCount
+                            total == 0 || lastVisible == null || lastVisible >= total - 2
+                        }
+                    }
+                    LaunchedEffect(messages.value.size) {
+                        if (messages.value.isNotEmpty() && isNearBottom) {
+                            listState.animateScrollToItem(messages.value.size - 1)
+                        }
+                    }
 
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(5.dp),

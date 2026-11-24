@@ -45,7 +45,7 @@ class SpaceRepositoryImpl(
             emit(RefreshResult.Cached(cached.map { SpaceMapper.toDomain(it) }))
         }
         val cachedDomain = cached.map { SpaceMapper.toDomain(it) }
-        fetchWithCache(cachedDomain) {
+        fetchWithCache(cachedDomain, { emit(it) }) {
             val body: List<Space> = client.get("${BASE_URL}/getSpaces") {
                 headers { append(HttpHeaders.Authorization, "Bearer $JWT_KEY") }
             }.body()
@@ -60,7 +60,7 @@ class SpaceRepositoryImpl(
             emit(RefreshResult.Cached(listOf(cached)))
         }
         val cachedList = listOfNotNull(cached)
-        fetchWithCache(cachedList) {
+        fetchWithCache(cachedList, { emit(it) }) {
             val body: SpaceAndChats = client.get("${BASE_URL}/getSpaceAndChats/$spaceId") {
                 headers { append(HttpHeaders.Authorization, "Bearer $JWT_KEY") }
             }.body()

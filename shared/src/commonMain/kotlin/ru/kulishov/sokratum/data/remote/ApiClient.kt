@@ -88,8 +88,9 @@ object ApiClient {
  * кэш есть — Offline(кэш, ошибка), кэша нет — Error.
  * Возвращает результат блока или null, если запрос завершился ошибкой.
  */
-internal suspend fun <T> FlowCollector<RefreshResult<T>>.fetchWithCache(
+internal suspend fun <T> fetchWithCache(
     cached: List<T>,
+    emit: suspend (RefreshResult<T>) -> Unit,
     fetch: suspend () -> List<T>
 ): List<T>? {
     return try {

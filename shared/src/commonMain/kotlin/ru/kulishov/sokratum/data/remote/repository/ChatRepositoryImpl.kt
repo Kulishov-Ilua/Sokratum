@@ -1,19 +1,26 @@
 package ru.kulishov.sokratum.data.remote.repository
 
 import io.ktor.client.call.body
-import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.ServerResponseException
+import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.io.IOException
+import kotlinx.serialization.json.Json
 import ru.kulishov.sokratum.data.ai.AIModels
 import ru.kulishov.sokratum.data.local.dao.ChatDao
 import ru.kulishov.sokratum.data.local.dao.MessageDao
@@ -23,6 +30,7 @@ import ru.kulishov.sokratum.data.remote.ApiClient
 import ru.kulishov.sokratum.data.remote.KtorClient.BASE_URL
 import ru.kulishov.sokratum.data.remote.KtorClient.JWT_KEY
 import ru.kulishov.sokratum.data.remote.KtorClient.client
+import ru.kulishov.sokratum.data.remote.authHeader
 import ru.kulishov.sokratum.data.remote.fetchWithCache
 import ru.kulishov.sokratum.data.remote.model.chats.SendMessageRequest
 import ru.kulishov.sokratum.domain.model.Chat
@@ -46,7 +54,7 @@ class ChatRepositoryImpl(
             emit(RefreshResult.Cached(cached.map { ChatMapper.toDomain(it) }))
         }
         val cachedDomain = cached.map { ChatMapper.toDomain(it) }
-        fetchWithCache(cachedDomain) {
+        fetchWithCache(cachedDomain, { emit(it) }) {
             val body: List<Chat> = client.get("${BASE_URL}/getAllChats") {
                 headers { append(HttpHeaders.Authorization, "Bearer $JWT_KEY") }
             }.body()
@@ -92,7 +100,7 @@ class ChatRepositoryImpl(
                 emit(RefreshResult.Cached(cached.map { MessageMapper.toDomain(it) }))
             }
             val cachedDomain = cached.map { MessageMapper.toDomain(it) }
-            fetchWithCache(cachedDomain) {
+            fetchWithCache(cachedDomain, { emit(it) }) {
                 val ret: ChatAndMessages = client.get("${BASE_URL}/getChatAndMessages/$chatId") {
                     headers { append(HttpHeaders.Authorization, "Bearer $JWT_KEY") }
                 }.body()
@@ -162,12 +170,13 @@ class ChatRepositoryImpl(
         chatId: Int,
         spaceId: Long,
         afterMessageId: Long?,
-        outgoing: Flow<Message>
-    ): Flow<RefreshResult<Message>> = flow {
-        if (chatId < 0) {
+        outgoing: Flow<SendMessageRequest>
+    ): Flow<RefreshResult<Message>> = channelFlow {
+        var effectiveChatId = chatId
+        if (effectiveChatId < 0) {
             if (spaceId < 0) {
-                emit(RefreshResult.Error)
-                return@flow
+                send(RefreshResult.Error)
+                return@channelFlow
             }
             val chat = addChat(
                 Chat(
@@ -176,39 +185,105 @@ class ChatRepositoryImpl(
                 )
             )
             if (chat == null) {
-                emit(RefreshResult.Error)
-                return@flow
+                send(RefreshResult.Error)
+                return@channelFlow
             }
             chatDao.addChat(ChatMapper.toEntity(chat))
-            return@flow
+            effectiveChatId = chat.id.toInt()
         }
-        val cached = messageDao.getMessages(chatId.toLong())
-        if (cached.isNotEmpty()) {
-            emit(RefreshResult.Cached(cached.map { MessageMapper.toDomain(it) }))
-        }
-        val cachedDomain = cached.map { MessageMapper.toDomain(it) }
-        fetchWithCache(cachedDomain) {
-            val ret: ChatAndMessages = client.get("${BASE_URL}/getChatAndMessages/$chatId") {
-                headers { append(HttpHeaders.Authorization, "Bearer $JWT_KEY") }
-            }.body()
-            chatDao.addChat(
-                ChatMapper.toEntity(
-                    Chat(
-                        id = ret.id.toLong(),
-                        spaceId = ret.spaceId.toLong(),
-                        name = ret.name,
-                        systemPrompt = ret.systemPrompt,
-                        lastOpen = Instant.fromEpochSeconds(ret.lastOpen).toLocalDateTime(TimeZone.UTC)
+
+        var cursor = afterMessageId ?: -1L
+
+        if (chatId >= 0) {
+            val cached = messageDao.getMessages(effectiveChatId.toLong())
+            if (cached.isNotEmpty()) {
+                send(RefreshResult.Cached(cached.map { MessageMapper.toDomain(it) }))
+                cursor = maxOf(cursor, cached.map { it.id ?: -1L }.max())
+            }
+            val cachedDomain = cached.map { MessageMapper.toDomain(it) }
+            val initial = fetchWithCache(cachedDomain, { send(it) }) {
+                val ret: ChatAndMessages = client.get("${BASE_URL}/getChatAndMessages/$effectiveChatId") {
+                    headers { append(HttpHeaders.Authorization, "Bearer $JWT_KEY") }
+                }.body()
+                chatDao.addChat(
+                    ChatMapper.toEntity(
+                        Chat(
+                            id = ret.id.toLong(),
+                            spaceId = ret.spaceId.toLong(),
+                            name = ret.name,
+                            systemPrompt = ret.systemPrompt,
+                            lastOpen = Instant.fromEpochSeconds(ret.lastOpen).toLocalDateTime(TimeZone.UTC)
+                        )
                     )
                 )
-            )
-            messageDao.replaceAll(chatId.toLong(), ret.messages.messages.map { MessageMapper.toEntity(it) })
-            ret.messages.messages
+                messageDao.replaceAll(
+                    effectiveChatId.toLong(),
+                    ret.messages.messages.map { MessageMapper.toEntity(it) })
+                ret.messages.messages
+            } ?: return@channelFlow
+            cursor = maxOf(cursor, initial.map { it.id }.maxOrNull() ?: -1L)
+        }
+
+        // WebSocket: отправка и приём сообщений, с переподключением при обрыве
+        val wsBaseUrl = BASE_URL.replaceFirst("http", "ws")
+        var reconnectDelayMs = 1_000L
+        while (currentCoroutineContext().isActive) {
+            try {
+                // Догружаем сообщения, пропущенные за время обрыва
+                if (cursor >= 0) {
+                    val missed = updateMessages(effectiveChatId.toLong(), cursor)
+                    if (missed != null) {
+                        missed.messages.forEach { messageDao.addMessage(MessageMapper.toEntity(it)) }
+                        if (missed.messages.isNotEmpty()) {
+                            send(RefreshResult.Fresh(missed.messages))
+                            cursor = maxOf(cursor, missed.messages.map { it.id }.max())
+                        }
+                    }
+                }
+
+                client.webSocket(
+                    urlString = "$wsBaseUrl/messages/$effectiveChatId/$cursor",
+                    request = { authHeader() }
+                ) {
+                    reconnectDelayMs = 1_000L
+                    coroutineScope {
+                        val writer = launch {
+                            outgoing.collect { request ->
+                                send(
+                                    Frame.Text(
+                                        Json.encodeToString(
+                                            request.copy(chatId = effectiveChatId)
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                        try {
+                            for (frame in incoming) {
+                                if (frame is Frame.Text) {
+                                    val message = Json.decodeFromString<Message>(frame.readText())
+                                    messageDao.addMessage(MessageMapper.toEntity(message))
+                                    cursor = maxOf(cursor, message.id)
+                                    send(RefreshResult.Fresh(listOf(message)))
+                                }
+                            }
+                        } finally {
+                            writer.cancel()
+                        }
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            delay(reconnectDelayMs)
+            reconnectDelayMs = (reconnectDelayMs * 2).coerceAtMost(30_000L)
         }
     }
 
     override suspend fun send(message: Message) {
-        // Метод сохранён ради совместимости с ChatRepository; серверного эндпоинта
-        // для прямой отправки сообщения без AI-ответа нет.
+        // Метод сохранён ради совместимости с ChatRepository; отправка идёт
+        // через WebSocket-канал (см. messages()).
     }
 }
